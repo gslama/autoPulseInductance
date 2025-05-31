@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9cec9493-59ae-42fd-8ba3-96c44ce46bf0" name="Changes" comment="- lots of debug fixes&#10;- adapted scanner and meter to do temperature only&#10;- scope chan 4 does output voltage&#10;- adjusted setup page&#10;- corrected ending program&#10;- this does compile into an exe">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autoOutput.py" beforeDir="false" afterPath="$PROJECT_DIR$/autoPulse.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;gslama&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/gslama/autoOutput.git&quot;,
+    &quot;accountId&quot;: &quot;b42471fa-2836-4974-8b8a-02d78ee5d4d5&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2lXK3kEqYS7EBHj922SaQ2HRmTf" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.MainView.executor": "Debug",
+    "Python.Models.executor": "Debug",
+    "Python.TestRoutines.executor": "Debug",
+    "Python.__init__.executor": "Run",
+    "Python.autoOutput.executor": "Debug",
+    "Python.excel_test.executor": "Debug",
+    "Python.main.executor": "Debug",
+    "Python.models.executor": "Run",
+    "Python.sdm3055sc.executor": "Debug",
+    "Python.sds824xhd.executor": "Debug",
+    "Python.signal_gen_base.executor": "Debug",
+    "Python.testplot.executor": "Debug",
+    "Python.testplot2.executor": "Debug",
+    "Python.testplot3.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Multi__instr",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/gslam/Dropbox/SlamaTech/Consulting/AUTO Programs Python/AutoPulseInductance/Source",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\AutoOutput\Source\autoOutput\dist" />
+      <recent name="C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\AutoOutput\Source\autoOutput" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-ce3d9afa04ac-ba05f1cad1b1-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.20224.347" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9cec9493-59ae-42fd-8ba3-96c44ce46bf0" name="Changes" comment="" />
+      <created>1725320784367</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1725320784367</updated>
+    </task>
+    <task id="LOCAL-00001" summary="First time">
+      <option name="closed" value="true" />
+      <created>1732117304191</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1732117304191</updated>
+    </task>
+    <task id="LOCAL-00002" summary="from Bel Air">
+      <option name="closed" value="true" />
+      <created>1732916895413</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1732916895413</updated>
+    </task>
+    <task id="LOCAL-00003" summary="testing partially working">
+      <option name="closed" value="true" />
+      <created>1733539326963</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1733539326963</updated>
+    </task>
+    <task id="LOCAL-00004" summary="testing working - half of data updates working - finally have something that works use queue and threading">
+      <option name="closed" value="true" />
+      <created>1736047258434</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1736047258434</updated>
+    </task>
+    <task id="LOCAL-00005" summary="- testing and updating works&#10;- csv files work&#10;- sql data correct&#10;- fixed tabs&#10;- added 'next' and 'testing' serial&#10;- test button disable during test&#10;- fix pulse width, lpulse units">
+      <option name="closed" value="true" />
+      <created>1737844353389</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1737844353389</updated>
+    </task>
+    <task id="LOCAL-00006" summary="- excel macro charting works">
+      <option name="closed" value="true" />
+      <created>1738067552487</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1738067552487</updated>
+    </task>
+    <task id="LOCAL-00007" summary="- excel macro charting works">
+      <option name="closed" value="true" />
+      <created>1738067559641</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1738067559641</updated>
+    </task>
+    <task id="LOCAL-00008" summary="- added bases for scope, scanner, power supply, sig gen&#10;- scope is more or less complete&#10;- working on scanner/meter">
+      <option name="closed" value="true" />
+      <created>1743300080501</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1743300080501</updated>
+    </task>
+    <task id="LOCAL-00009" summary="- test working with rs scope, agilent and gwinstek&#10;- fixed charting&#10;- fixed temp updating&#10;- radio buttons for current probe&#10;- fixed csv file creation">
+      <option name="closed" value="true" />
+      <created>1744421709723</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1744421709723</updated>
+    </task>
+    <task id="LOCAL-00010" summary="- working with siglent scope more or less">
+      <option name="closed" value="true" />
+      <created>1744940050894</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1744940050894</updated>
+    </task>
+    <task id="LOCAL-00011" summary="- siglent scope working&#10;- added abort using escape key and proper recovery&#10;- fixed end of test to start new bar&#10;- added manual serial number entry and continue to next testable part afterwards">
+      <option name="closed" value="true" />
+      <created>1745454402043</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1745454402043</updated>
+    </task>
+    <task id="LOCAL-00012" summary="- siglent signal generator added as universal">
+      <option name="closed" value="true" />
+      <created>1745628758687</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1745628758687</updated>
+    </task>
+    <task id="LOCAL-00013" summary="- added power supplies generic but only working with gwinstek because do not have the siglent">
+      <option name="closed" value="true" />
+      <created>1745633292374</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1745633292374</updated>
+    </task>
+    <task id="LOCAL-00014" summary="- tried to make siglent meter/scanner work but is too slow&#10;- three one second relay clicks to get one temp reading&#10;- taking a different course">
+      <option name="closed" value="true" />
+      <created>1746060095882</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1746060095882</updated>
+    </task>
+    <task id="LOCAL-00015" summary="- converted to meter for temp only, use chan 4 on scope for vout and use power supply to read vin&#10;- added abort to if start vtemp not right&#10;- added read volatage, current to power supply functions&#10;- appears to work great">
+      <option name="closed" value="true" />
+      <created>1746150409315</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1746150409315</updated>
+    </task>
+    <task id="LOCAL-00016" summary="- commented out many temp readings because part does not run long enough to heat much&#10;- speeds test up a lot&#10;- can test 10 pulse widths in 26 seconds&#10;- need to check power supply functions are called correctly.">
+      <option name="closed" value="true" />
+      <created>1746320514958</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1746320514958</updated>
+    </task>
+    <task id="LOCAL-00017" summary="- added siglent power supply&#10;- working">
+      <option name="closed" value="true" />
+      <created>1746496957016</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1746496957016</updated>
+    </task>
+    <task id="LOCAL-00018" summary="- lots of debug fixes&#10;- adapted scanner and meter to do temperature only&#10;- scope chan 4 does output voltage&#10;- adjusted setup page&#10;- corrected ending program&#10;- this does compile into an exe">
+      <option name="closed" value="true" />
+      <created>1748650425788</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1748650425788</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="First time" />
+    <MESSAGE value="from Bel Air" />
+    <MESSAGE value="testing partially working" />
+    <MESSAGE value="testing working - half of data updates working - finally have something that works use queue and threading" />
+    <MESSAGE value="- testing and updating works&#10;- csv files work&#10;- sql data correct&#10;- fixed tabs&#10;- added 'next' and 'testing' serial&#10;- test button disable during test&#10;- fix pulse width, lpulse units" />
+    <MESSAGE value="- excel macro charting works" />
+    <MESSAGE value="- added bases for scope, scanner, power supply, sig gen&#10;- scope is more or less complete&#10;- working on scanner/meter" />
+    <MESSAGE value="- test working with rs scope, agilent and gwinstek&#10;- fixed charting&#10;- fixed temp updating&#10;- radio buttons for current probe&#10;- fixed csv file creation" />
+    <MESSAGE value="- working with siglent scope more or less" />
+    <MESSAGE value="- siglent scope working&#10;- added abort using escape key and proper recovery&#10;- fixed end of test to start new bar&#10;- added manual serial number entry and continue to next testable part afterwards" />
+    <MESSAGE value="- siglent signal generator added as universal" />
+    <MESSAGE value="- added power supplies generic but only working with gwinstek because do not have the siglent" />
+    <MESSAGE value="- tried to make siglent meter/scanner work but is too slow&#10;- three one second relay clicks to get one temp reading&#10;- taking a different course" />
+    <MESSAGE value="- converted to meter for temp only, use chan 4 on scope for vout and use power supply to read vin&#10;- added abort to if start vtemp not right&#10;- added read volatage, current to power supply functions&#10;- appears to work great" />
+    <MESSAGE value="- commented out many temp readings because part does not run long enough to heat much&#10;- speeds test up a lot&#10;- can test 10 pulse widths in 26 seconds&#10;- need to check power supply functions are called correctly." />
+    <MESSAGE value="- added siglent power supply&#10;- working" />
+    <MESSAGE value="- lots of debug fixes&#10;- adapted scanner and meter to do temperature only&#10;- scope chan 4 does output voltage&#10;- adjusted setup page&#10;- corrected ending program&#10;- this does compile into an exe" />
+    <option name="LAST_COMMIT_MESSAGE" value="- lots of debug fixes&#10;- adapted scanner and meter to do temperature only&#10;- scope chan 4 does output voltage&#10;- adjusted setup page&#10;- corrected ending program&#10;- this does compile into an exe" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
