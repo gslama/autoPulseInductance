@@ -11,7 +11,7 @@ datas = matplotlib_datas + [
 ]
 
 a = Analysis(
-    ['autoOutput.py'],  # Your main script
+    ['autoPulse.py'],  # Your main script
     pathex=[],
     binaries=[
         ('C:\\Users\\gslam\\Dropbox\\SlamaTech\\Consulting\\AUTO Programs Python\\AutoOutput\\Source\\autoOutput\\.venv\\Lib\\site-packages\\pyodbc.pyd', '.'),
@@ -49,6 +49,6 @@ exe = EXE(
     strip=False,
     upx=True,
     console=True  # Set to False if you're using a Tkinter GUI only
-    # icon='C:\\Users\\gslam\\Dropbox\\SlamaTech\\Consulting\\AUTO Programs Python\\AutoOutput\\Source\\autoOutput\\oscilloscope.ico'
+    # icon='C:\\Users\\gslam\\Dropbox\\SlamaTech\\Consulting\\AUTO Programs Python\\AutoPulseInductance\\Source\\oscilloscope.ico'
 )
 

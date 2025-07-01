@@ -4,6 +4,7 @@ TestRoutines.py
 """
 import pyvisa
 from win32cryptcon import CMSG_HASHED_DATA_V2
+import re
 
 import models as dbase
 #from main import mainview
@@ -103,10 +104,10 @@ def setup_scope(scope):
     scope.set_chan_position(1, 2)
     scope.set_chan_bandwidth(1, "B20")
 
-    # channel 2 used for vdss with 10:1 probe
+    # channel 2 used for gate pulse with 10:1 probe
     scope.set_chan_state(2,"ON")
     scope.set_chan_probe(2, 1E1)
-    scope.set_chan_scale(2, 1E2)
+    scope.set_chan_scale(2, 2E0)
     scope.set_chan_position(2, -3)
     scope.set_chan_bandwidth(2, "B20")
 
@@ -116,7 +117,7 @@ def setup_scope(scope):
     scope.set_chan_unit(3, 'A')
     #scope.set_chan_probe(3, 1E1)
     scope.set_chan_scale(3, 200E-3)
-    scope.set_chan_position(3, 2)
+    scope.set_chan_position(3, -3)
     scope.set_chan_impedance(3, "FIFTY")
     scope.set_chan_coupling(3,"DC")
     scope.set_chan_bandwidth(3, "B20")
@@ -143,14 +144,17 @@ def setup_scope(scope):
     # measurements
     scope.set_meas_system("ON")
 
+    # peak current
     scope.set_meas_type(1, "MAX")
     scope.set_meas_source(1, 3)
     scope.set_meas_state(1, "ON")
 
-    scope.set_meas_type(2, "MAX")
+    # pulse width
+    scope.set_meas_type(2, "WID")
     scope.set_meas_source(2, 2)
     scope.set_meas_state(2, "ON")
 
+    # output voltage
     scope.set_meas_type(3, "RMS")
     scope.set_meas_source(3, 4)
     scope.set_meas_state(3, "ON")
@@ -161,15 +165,16 @@ def setup_scope(scope):
     #scope.set_timebase_reference("POS")
     #scope.set_timebase_position(10)
 
+    # acquisition
+    scope.set_acquisition_type("NORM")
+
     # triggering
-    scope.set_trigger_mode("NORM")
+    scope.set_trigger_mode("SING")
     scope.set_trigger_source(1)
     scope.set_trigger_level(3.0)  # was 4
     scope.set_trigger_coupling("DC")
-    scope.set_trigger_edge("RISE")
+    scope.set_trigger_edge("FALL")
 
-    # acquisition
-    scope.set_acquisition_type("NORM")
 
 def setup_tek_scope():
     """
@@ -404,15 +409,13 @@ def setup_rs_scope():
 
 
 
-def test_output(update_queue, done_event, stop_flag_callback):
+def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
     '''
-    This tests the output by turning on power, and stepping the pulse width from start to stop
-    while checking peak current and output voltage thresholds to stop early
-    The values are read from the scope four times, the first is tossed and the last three are averaged
+    This tests the output by turning on power, and using a single long pulse to get
+    peak current and time to calculate inductance
     Temperature is monitored to prevent a hot start
     Instruments are opened and left open to increase speed
-    Failure turns of power and sig gen
-    outputs a csv of each iteration and records final values to database
+    Failure turns off power and sig gen
 
     reading_frame: calling instance
     :return:
@@ -423,47 +426,6 @@ def test_output(update_queue, done_event, stop_flag_callback):
     cancel_code = 50
     status = 0
     gb.testData.lpulseSpecific = ''
-
-    # make a csv file name for this part
-    base_path = "Design\\LTCC\\TestData"
-    output_path = "Output_Test"
-    bar_num = "4255Y"
-    design_num = "D47"
-    part_num = "27"
-    directory = (f"{base_path}\\{output_path}\\{gb.testInfo.barNum}")
-    output_file = (f"{gb.testInfo.barNum}{gb.testInfo.designNum}x{gb.testInfo.position}.csv")
-    file_path = os.path.join(directory, output_file)
-
-    # create the directory if it does not exist
-    os.makedirs(directory, exist_ok=True)
-
-    # check if it exists
-    if os.path.exists(output_file):
-        print(f"The file '{output_file}' exists.")
-        # message
-        response = messagebox.askyesnocancel(title="File exists", message=f"File '{output_file}' already exists. Yes overwrites, No appends. Do you want to overwrite it?")
-
-        if response is True:
-            # overwrite file
-            dbase.create_output_file_header()
-        elif response is False:
-            # append to file
-            pass
-        else:
-            # cancel, exit
-            return cancel_code
-    else:
-        print(f"Creating '{output_file}'")
-        # create it
-        dbase.create_output_file_header()
-
-
-    #try:
-    #    instr_power = rm.open_resource(gb.initValues['powerAdr'])
-    #except Exception as e:
-    #    print('power supply is offline, ', e)
-    #    messagebox.showerror(title="Testing", message="Power supply is offline")
-    #    return cancel_code
 
     # set power supply
     power_set()
@@ -481,49 +443,81 @@ def test_output(update_queue, done_event, stop_flag_callback):
         pulse_units = 1
 
     # reducing starting width by one pulse step because loop adds one step immediately
-    pulse_width = float(gb.testInfo.pulseStart)
+    pulse_width = float(gb.testInfo.pulseStop)
 
-    # reset timers
-    minutes = 0
-    timer_flag = False
-    last_pulse_width = 0
-    last_ipk = 0
-    last_vout = 0
-    abort_flag = False
-
-    # determine number of loops
-    # needed round() to fix float conversion
-    test_steps = round((float(gb.testInfo.pulseStop) - float(gb.testInfo.pulseStart)) / float(gb.testInfo.pulseStep)) + 1
-    #print(f"num of test steps: {test_steps}")
-
-    # start main loop ==================================================
-    for i in range(test_steps):
-        #    check part temperature is in range
-        #log_temp = float(get_temperature(instr_scan))
-        log_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan,'T')
-        while (log_temp < gb.testInfo.minTemp or log_temp > gb.testInfo.maxTemp):
-            # display
-            # if too cold wait by checking every 2 seconds
-            if log_temp < gb.testInfo.minTemp:
-                label_update = {'type': 'label', 'label_name': 'status', 'value': "Too Cold", 'color': "sky blue"}
-                update_queue.put(label_update)
-            # if too hot wait by checking every 2 seconds
-            if log_temp > gb.testInfo.maxTemp:
-                label_update = {'type': 'label', 'label_name': 'status', 'value': "Too Hot", 'color': "red"}
-                update_queue.put(label_update)
-
-            # wait 2 seconds
-            time.sleep(2)
-            #log_temp = get_temperature(instr_scan)
-            log_temp = float(gb.meter.get_meas_temp(gb.testInfo.tempChan,'T'))
-            label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{log_temp:.1f}", 'color': "grey85"}
+    # check part temperature is in range
+    # log_temp = float(get_temperature(instr_scan))
+    log_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+    while (log_temp < gb.testInfo.minTemp or log_temp > gb.testInfo.maxTemp):
+        # display
+        # if too cold wait by checking every 2 seconds
+        if log_temp < gb.testInfo.minTemp:
+            label_update = {'type': 'label', 'label_name': 'status', 'value': "Too Cold", 'color': "sky blue"}
+            update_queue.put(label_update)
+        # if too hot wait by checking every 2 seconds
+        if log_temp > gb.testInfo.maxTemp:
+            label_update = {'type': 'label', 'label_name': 'status', 'value': "Too Hot", 'color': "red"}
             update_queue.put(label_update)
 
-            if stop_flag_callback():
-                print("Stop flag triggered")
-                abort_flag = True
-                break
+        # wait 2 seconds
+        time.sleep(2)
+        # log_temp = get_temperature(instr_scan)
+        log_temp = float(gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T'))
+        label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{log_temp:.1f}", 'color': "grey85"}
+        update_queue.put(label_update)
 
+        if stop_flag_callback():
+            print("Stop flag triggered")
+            abort_flag = True
+            break
+
+    # preheat sequence
+    abort_flag = False
+    if preheat_on.get():
+
+        label_update = {'type': 'label', 'label_name': 'status', 'value': "PreHeat", 'color': "yellow"}
+        update_queue.put(label_update)
+
+        # turn on power and signal generator
+        gb.sig_gen.set_output_state('OFF')
+        gb.sig_gen.set_output_state('ON')
+
+        # wait a half second to stablize
+        time.sleep(0.5)
+
+        # monitor temperature until target
+        gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+        while gb.testData.finalTemp < gb.testInfo.setTemp:
+            # display
+            label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{gb.testData.finalTemp:.1f}",
+                            'color': "grey85"}
+            update_queue.put(label_update)
+            gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+
+            # check for abort - premature end of test
+            if abort_flag:
+                label_update = {'type': 'label', 'label_name': 'status', 'value': "Aborted", 'color': "red"}
+                update_queue.put(label_update)
+                # turn stuff off
+                gb.sig_gen.set_output_state('OFF')
+                gb.sig_gen.set_output_state('OFF')
+                # delay so shows up on display
+                time.sleep(0.2)
+                done_event.set()
+                return
+
+        # turn off signal generator
+        gb.sig_gen.set_output_state('OFF')
+
+        # clear status
+        label_update = {'type': 'label', 'label_name': 'status', 'value': "Testing", 'color': "gray85"}
+        update_queue.put(label_update)
+
+    # update start time
+    start_time = time.time()
+
+    # start main loop ==================================================
+    for i in range(3):
         # check for abort - premature end of test
         if abort_flag:
             label_update = {'type': 'label', 'label_name': 'status', 'value': "Aborted", 'color': "red"}
@@ -533,13 +527,8 @@ def test_output(update_queue, done_event, stop_flag_callback):
             done_event.set()
             return
 
-        # update start time
-        start_time = time.time()
-        now = datetime.now()
-        gb.testData.logTime = now.strftime("%Y-%m-%d %H:%M:%S")
-        # todo replace start_temp with log_temp to save time
-        #start_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
-        start_temp = log_temp
+        # set scope to one shot
+        #gb.scope.set_trigger_mode('SING')
 
         # start test
         gb.power.set_power_state(1, 'ON')
@@ -558,30 +547,19 @@ def test_output(update_queue, done_event, stop_flag_callback):
         # pulse width sent in seconds to meter
         gb.sig_gen.set_pulse_width(round(pulse_width * pulse_units, 9))
         gb.testData.pulseWidth = pulse_width
-        # display
-        label_update = {'type': 'label', 'label_name': 'pulsewidth', 'value': f"{gb.testData.pulseWidth:.1f}", 'color': "grey85"}
-        update_queue.put(label_update)
 
-        #    turn on generator
+        # turn on generator
         gb.sig_gen.set_output_state('ON')
 
-        #    wait 300 ms
-        time.sleep(0.3)
+        # wait 200 ms
+        time.sleep(0.2)
 
-        # clear arrays
-        tmp_vout = [0] * 4
-        tmp_ipk = [0] * 4
-        tmp_vdss = [0] * 4
-
-        #    loop 4 times
-        for i in range(4):
-            #print(f"index: {i}")
-            # get current
-            tmp_ipk[i] = get_current(gb.scope)
-            # get output voltage
-            tmp_vout[i] = get_output_voltage(gb.scope)
-            # get vdss
-            tmp_vdss[i] = get_vdss(gb.scope)
+        # get pulse width
+        meas_pulse_width = float(gb.scope.get_meas_value(2))
+        # get current
+        meas_ipk = float(gb.scope.get_meas_value(1))
+        # get output voltage
+        meas_vout = float(gb.scope.get_meas_value(3))
 
         # turn off generator
         gb.sig_gen.set_output_state('OFF')
@@ -594,143 +572,80 @@ def test_output(update_queue, done_event, stop_flag_callback):
         print(f"test time: {gb.testData.testTime}")
 
         # get temperature
-        # loop temperature until max is reached
-        # todo restore temp loop
-        # log_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
-        '''
-        # removed this becaus etest so fast the part hardly heats up
-        # seems each temp reading takes 1 second
-        max_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
-        while max_temp > log_temp:
-            log_temp = max_temp
-            max_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
-            #time.sleep(1)
-        gb.testData.finalTemp = max_temp
-        gb.testData.tempDiff = max_temp - start_temp
-        '''
         gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
-        gb.testData.tempDiff = gb.testData.finalTemp - start_temp
         print(f'max_temp: {gb.testData.finalTemp}')
         # display
         label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{gb.testData.finalTemp:.1f}", 'color': "grey85"}
         update_queue.put(label_update)
 
-        # average last three readings
-        avg_vout = (tmp_vout[1]+tmp_vout[2]+tmp_vout[3])/3.0
+        # display actual pulse width
+        # display
+        label_update = {'type': 'label', 'label_name': 'pulsewidth', 'value': f"{1E6*meas_pulse_width:.2f}", 'color': "grey85"}
+        update_queue.put(label_update)
+
+        # todo left off here
         # scale by ratio
-        avg_vout = avg_vout * gb.testInfo.voltageRatio
+        avg_vout = meas_vout * gb.testInfo.voltageRatio
         gb.testData.vout = avg_vout
         # display
         label_update = {'type': 'label', 'label_name': 'vout', 'value': f"{gb.testData.vout:.1f}", 'color': "grey85"}
         update_queue.put(label_update)
 
-        avg_ipk = (tmp_ipk[1]+tmp_ipk[2]+tmp_ipk[3])/3.0
         # scale to ratio and convert of amps
-        #avg_ipk = avg_ipk / (gb.testInfo.currentRatio * 1E-3)
-        gb.testData.ipk = avg_ipk
+        meas_ipk = meas_ipk / (gb.testInfo.currentRatio * 1E-3)
+        gb.testData.ipk = meas_ipk
         # display
         label_update = {'type': 'label', 'label_name': 'ipk', 'value': f"{gb.testData.ipk:.3f}", 'color': "grey85"}
         update_queue.put(label_update)
 
-        gb.testData.vdss = (tmp_vdss[1]+tmp_vdss[2]+tmp_vdss[3])/3.0
-        # display
-        label_update = {'type': 'label', 'label_name': 'vdss', 'value': f"{gb.testData.vdss:.1f}", 'color': "grey85"}
-        update_queue.put(label_update)
+        # todo - display pulse width?
 
-        # display update plot
-        label_update = {'type': 'plot', 'x_data': avg_ipk, 'y_data': avg_vout * 0.001, }
-        update_queue.put(label_update)
+        #print(f"meas_vout: {meas_vout:.3f}")
+        #print(f"meas_ipk: {meas_ipk:.3f}")
 
-        #print(f"avg_vout: {avg_vout:.3f}")
-        #print(f"avg_ipk: {avg_ipk:.3f}")
-        #print(f"avg_vdss: {gb.testData.vdss:.3f}")
-
-        # check of errors
-        # no primary current - arbitrarily set to 50 mA, was 50 mA
-        if avg_ipk < 0.40:
-            messagebox.showerror(title="Test Error", message="Primary Open. Check connections or part")
-            abort_flag = True
-            break
-
-        # open secondary
-        if avg_vout < 0.1:
-            messagebox.showerror(title="Test Error", message="Secondary Open or Shorted. Check connections or part")
-            abort_flag = True
-            break
-
-        # calculate pulse inductance of this loop in uH
-        gb.testData.lpulse = (vin * pulse_width) / avg_ipk
-        #label_update = {'type': 'label', 'label_name': 'lpulse', 'value': f"{gb.testData.lpulse:.2f}", 'color': "grey85"}
-        #update_queue.put(label_update)
-
-        # calculate pulse inductance at threshold point
-        # capture pulsewidth, pk current and voltage with each pass until over threshold
-        # then use old valve and current value to do calculation
-        #last_ipk = avg_ipk
-        if avg_ipk > gb.testInfo.lpulseCurrent and gb.testData.lpulseSpecific == '':
-            # do calc by interpolation
-            # calculate pulse inductance at target
-            # first get pulse inductance at the two reading levels provided
-            # Vin is the input voltage
-            l_new = (vin * pulse_width) / avg_ipk
-            #todo something not right here
-            l_old = (vin * last_pulse_width) / last_ipk
-
-            # second find slope and determine inductance at target
-            slope = (l_new - l_old) / (avg_ipk - last_ipk)
-            gb.testData.lpulseSpecific = l_old + slope * (gb.testInfo.lpulseCurrent - last_ipk)
-            label_update = {'type': 'label', 'label_name': 'lpulsespec', 'value': f"{gb.testData.lpulseSpecific:.2f}",
-                            'color': "grey85"}
-            update_queue.put(label_update)
-
-            # calculate output voltage at target current
-            sSlope = (avg_vout - last_vout) / (avg_ipk - last_ipk)
-            gb.testData.voutlp = last_vout + sSlope * (gb.testInfo.lpulseCurrent - last_ipk)
-            label_update = {'type': 'label', 'label_name': 'voutlp', 'value': f"{gb.testData.voutlp:.2f}",
-                            'color': "grey85"}
-            update_queue.put(label_update)
-
-        else:
-            # save values
-            last_pulse_width = pulse_width
-            last_ipk = avg_ipk
-            last_vout = avg_vout
-
-        # write line of results to csv file for each loop interation
-        dbase.append_data_output_file()
-
-        # check to stop loop
-        # max current
-        if avg_ipk > float(gb.testInfo.thresholdCurrent):
-            # need to stop
-            break
-
-        # max output voltage
-        if avg_vout > float(gb.testInfo.thresholdVoltage):
-            # need to stop
-            break
-
-        # increment pulse width
-        pulse_width = pulse_width + float(gb.testInfo.pulseStep)
-        if pulse_width > float(gb.testInfo.pulseStop):
-            # end of test - message?
-            break
-
-        # display waiting
-        label_update = {'type': 'label', 'label_name': 'status', 'value': "Waiting", 'color': "grey85"}
-        update_queue.put(label_update)
-
-        # clock out test interval between pulse steps
-        start_time = time.time()
-        while time.time() - start_time < float(gb.testInfo.testInterval):
-            pass
-
-        if stop_flag_callback():
-            print("Stop flag triggered")
-            abort_flag = True
+        # check for minimum pulse width of 1.5 us to break out
+        if meas_pulse_width > 1.5E-6:
             break
 
     # end of main test for loop =================================
+
+    # check for errors
+    # minimum pulse width - value based on empirical testing
+    if meas_pulse_width < 1.5E-6:
+        messagebox.showerror(title="Test Error", message="Pulse width too short. Check connections or part")
+        abort_flag = True
+        #return
+
+    # no primary pulse current - arbitrarily set to 400 mA
+    if meas_ipk < 0.40:
+        messagebox.showerror(title="Test Error", message="Primary Open. Check connections or part")
+        abort_flag = True
+        #return
+
+    # pulse current within expected range - +/- 10% of target
+    # current probe description as current value - need to extract it
+    # example probe = "1.5 A (0.604R)"
+    match = re.search(r"[-+]?\d*\.?\d+", gb.testInfo.currentProbe)
+    if match:
+        target_ipk = float(match.group())
+    else:
+        target_ipk = 0
+
+    if meas_ipk < target_ipk * 0.9 or meas_ipk > target_ipk * 1.1:
+        messagebox.showerror(title="Test Error", message="Pulse width out of range. Check connections or part")
+        abort_flag = True
+        #return
+
+    # open secondary
+    #if meas_vout < 0.1:
+    #    messagebox.showerror(title="Test Error", message="Secondary Open or Shorted. Check connections or part")
+    #    abort_flag = True
+        #return
+
+    if stop_flag_callback():
+        print("Stop flag triggered")
+        abort_flag = True
+        #break
 
     # shut down test
     shutdown_test()
@@ -745,6 +660,13 @@ def test_output(update_queue, done_event, stop_flag_callback):
         done_event.set()
         return
 
+
+    # calculate pulse inductance in uH
+    gb.testData.lpulse = (vin * meas_pulse_width) / meas_ipk
+    label_update = {'type': 'label', 'label_name': 'lpulse', 'value': f"{1E6*gb.testData.lpulse:.2f}", 'color': "grey85"}
+    update_queue.put(label_update)
+
+    '''
     # check minimum output voltage
     if avg_vout < (gb.testLimits['outputVoltmin']):
         gb.testData.status = 5
@@ -758,6 +680,7 @@ def test_output(update_queue, done_event, stop_flag_callback):
         status = 1
         label_update = {'type': 'label', 'label_name': 'status', 'value': "TR-Pass", 'color': "green"}
         update_queue.put(label_update)
+    '''
 
     # delay to allow mainview to update
     time.sleep(1)

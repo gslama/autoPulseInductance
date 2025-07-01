@@ -1,4 +1,4 @@
-# autoOutput
+# autoPulseInductance
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -43,9 +43,9 @@ if '--show-console' not in sys.argv:
 
 # define window
 root = tk.Tk()
-root.title("AutoOutput")
+root.title("AutoPulseInductance")
 root.iconbitmap(resource_path('oscilloscope.ico'))
-root.geometry("800x900+200+200")
+root.geometry("800x400+200+200")
 root.resizable(width=False, height=False)
 
 # define colors

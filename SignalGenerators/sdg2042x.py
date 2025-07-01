@@ -100,3 +100,7 @@ class SDG2042X(SignalGenerator):
     def set_output_impedance(self, impedance):
         # 50, HZ
         self.visa_session.write(f"C1:OUTPUT LOAD, {impedance}")
+
+    def set_output_invert(self, state):
+        # ON, OFF
+        self.visa_session.write(f"C1:INVT {state}")

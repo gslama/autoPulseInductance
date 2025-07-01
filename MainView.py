@@ -27,7 +27,7 @@ import TestRoutines
 import globals as gb
 import os
 
-from TestRoutines import test_output
+from TestRoutines import test_pulse
 
 # declare instance of dbase class
 dbase=models.DataBase()
@@ -80,7 +80,6 @@ class outputView(tk.Frame):
 
         optionsmenu = tk.Menu(menubar, tearoff=False)
         optionsmenu.add_command(label="Settings", command=self.settings_window)
-        optionsmenu.add_command(label="GPIB Addressing", command=self.gpib_addressing)
         optionsmenu.add_command(label="Debug", command=self.debug_mode)
         menubar.add_cascade(label="Options", menu=optionsmenu)
 
@@ -123,32 +122,24 @@ class outputView(tk.Frame):
         self.statusLabel.grid(column=6, row=0, sticky=(tk.W + tk.E), padx=5, pady=5)
 
 
-        # timer frame
-        timerfrm = ttk.LabelFrame(self, text=" Timer ", width=200, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
-        timerfrm.grid(column=0, row=1, columnspan=2, padx=10, pady=10, sticky="nwe")
-        #timerfrm.columnconfigure(0, weight=1)
+        # test frame
+        self.test_option = tk.StringVar(value='Standard Test')
+        self.option_map = {
+            'Standard Test': 1,
+            'STX @ 25C': 2,
+            'STX @ 85C': 3
+        }
+        testfrm = ttk.LabelFrame(self, text=" Test ", width=200, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
+        testfrm.grid(column=0, row=1, columnspan=2, padx=10, pady=10, sticky="nwe")
 
-        self.testinterval = tk.StringVar()
-        self.testinterval.set(gb.testInfo.testInterval)
-        self.testinterval.trace_add("write", self.on_testinterval_change)
-        testinterval_entry = ttk.Entry(timerfrm, width=7, textvariable=self.testinterval, validate='focusout',
-                                     validatecommand=self.check_interval)
-        testinterval_entry.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(timerfrm, text="Test Interval (s)").grid(column=1, row=0, sticky="w")
+        for i, label in enumerate(self.option_map.keys()):
+            ttk.Radiobutton(testfrm, text=label, value=label, variable=self.test_option, command=self.on_test_selection
+            ).grid(row=i, column=0, sticky="w", padx=10, pady=2)
 
-        self.setcurrent = tk.StringVar()
-        self.setcurrent.set(gb.testInfo.testCurrent)
-        self.setcurrent.trace_add("write", self.on_setcurrent_change)
-        setcurrent_entry = ttk.Entry(timerfrm, width=7, textvariable=self.setcurrent)
-        setcurrent_entry.grid(column=0, row=1, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(timerfrm, text="Set Current (A)").grid(column=1, row=1, sticky="w")
-
-        self.lpulsecurrent = tk.StringVar()
-        self.lpulsecurrent.set(gb.testInfo.lpulseCurrent)
-        self.lpulsecurrent.trace_add("write", self.on_lpulsecurrent_change)
-        lpulsecurrent_entry = ttk.Entry(timerfrm, width=7, textvariable=self.lpulsecurrent)
-        lpulsecurrent_entry.grid(column=0, row=4, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(timerfrm, text="Lpulse Current (A)").grid(column=1, row=4, sticky="w")
+        ttk.Label(testfrm, text="Confirm voltage and").grid(column=0, row=i+2, sticky="w")
+        ttk.Label(testfrm, text="current parameters for").grid(column=0, row=i+3, sticky="w")
+        ttk.Label(testfrm, text="each type of test in").grid(column=0, row=i+4, sticky="w")
+        ttk.Label(testfrm, text="Edit>Settings").grid(column=0, row=i+5, sticky="w")
 
 
         # threshold frame
@@ -170,19 +161,24 @@ class outputView(tk.Frame):
         maxtemp_entry.grid(column=0, row=1, padx=(0, 5), pady=5, sticky="we")
         ttk.Label(thresholdfrm, text="Max Temp (C)").grid(column=1, row=1, sticky="w")
 
-        self.currentlimit = tk.StringVar()
-        self.currentlimit.set(gb.testInfo.thresholdCurrent)
-        self.currentlimit.trace_add("write", self.on_currentlimit_change)
-        currentlimit_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.currentlimit)
-        currentlimit_entry.grid(column=0, row=3, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(thresholdfrm, text="Current Limit (A)").grid(column=1, row=3, sticky="w")
+        self.preheatOn = tk.BooleanVar()
+        checkbox = tk.Checkbutton(thresholdfrm, text="Preheat On", variable=self.preheatOn, command=self.on_preheat_change)
+        checkbox.grid(row=3, column=0, sticky='w', padx=5, pady=5)
+        self.setTemp = tk.StringVar()
+        self.setTemp.set(gb.testInfo.setTemp)
+        self.setTemp.trace_add("write", self.on_setTemp_change)
+        self.setTemp_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.setTemp)
+        self.setTemp_entry.grid(column=0, row=4, padx=(0, 5), pady=5, sticky="we")
+        ttk.Label(thresholdfrm, text="Set Temp (C)").grid(column=1, row=4, sticky="w")
+        self.setTemp_entry.config(state='disabled')
 
-        self.voltagelimit = tk.StringVar()
-        self.voltagelimit.set(gb.testInfo.thresholdVoltage)
-        self.voltagelimit.trace_add("write", self.on_voltagelimit_change)
-        voltagelimit_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.voltagelimit)
-        voltagelimit_entry.grid(column=0, row=4, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(thresholdfrm, text="Voltage Limit (V)").grid(column=1, row=4, sticky="w")
+        self.setTempRange = tk.StringVar()
+        self.setTempRange.set(gb.testInfo.setTempRange)
+        self.setTempRange.trace_add("write", self.on_setTempRange_change)
+        self.setTempRange_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.setTempRange)
+        self.setTempRange_entry.grid(column=0, row=5, padx=(0, 5), pady=5, sticky="we")
+        ttk.Label(thresholdfrm, text="Set Range (C)").grid(column=1, row=5, sticky="w")
+        self.setTempRange_entry.config(state='disabled')
 
 
         # reading frame
@@ -208,11 +204,11 @@ class outputView(tk.Frame):
         self.pulsewidth_entry.grid(column=2, row=1, padx=(0, 5), pady=5, sticky="we")
         ttk.Label(readingfrm, text="PulseWidth (us)").grid(column=2, row=0)
 
-        self.voltageoutlp = tk.StringVar()
-        self.voltageoutlp.set(gb.testData.voutlp)
-        self.voltageoutlp_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.voltageoutlp)
-        self.voltageoutlp_entry.grid(column=0, row=3, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(readingfrm, text="Vout@Lp (V))").grid(column=0, row=2)
+        #self.voltageoutlp = tk.StringVar()
+        #self.voltageoutlp.set(gb.testData.voutlp)
+        #self.voltageoutlp_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.voltageoutlp)
+        #self.voltageoutlp_entry.grid(column=0, row=3, padx=(0, 10), pady=5, sticky="we")
+        #ttk.Label(readingfrm, text="Vout@Lp (V))").grid(column=0, row=2)
 
         self.testtime = tk.StringVar()
         self.testtime.set(gb.testData.testTime)
@@ -238,13 +234,6 @@ class outputView(tk.Frame):
         self.voltageout_entry.grid(column=1, row=5, padx=(0, 10), pady=5, sticky="we")
         ttk.Label(readingfrm, text="Vout (V)").grid(column=1, row=4)
 
-        self.vdss = tk.StringVar()
-        self.vdss.set(gb.testData.vdss)
-        self.vdss_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.vdss)
-        self.vdss_entry.grid(column=2, row=5, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(readingfrm, text="Vdss (V)").grid(column=2, row=4)
-
-
         # initialize button
         self.initButton = (ttk.Button(self, text="Initialize", command=self.initialize))
         self.initButton.grid(column=1, row=7, padx=10, pady=5, sticky=tk.W)
@@ -260,8 +249,8 @@ class outputView(tk.Frame):
         self.testButton.config(state='disabled')
 
         # print chart button
-        self.chartButton = ttk.Button(self, text="Print Chart", command=self.print_chart)
-        self.chartButton.grid(column=4, row=7, padx=10, pady=5, sticky=tk.E)
+        self.ChkTempButton = ttk.Button(self, text="Check Temp", command=self.check_temp)
+        self.ChkTempButton.grid(column=4, row=7, padx=10, pady=5, sticky=tk.E)
         #self.chartButton.config(state='disabled')
 
         # close button
@@ -269,73 +258,6 @@ class outputView(tk.Frame):
         self.closeButton.grid(column=5, row=7, padx=10, pady=5, sticky=tk.E)
 
 
-        # Create a frame for the chart
-        #frame = ttk.LabelFrame(self, text=" Output Chart ", width=450, height=200, relief='raised', borderwidth=20)
-        #frame.grid(column=0, row=8, columnspan=6, padx=10, pady=10)
-        self.plot_frame = ttk.Frame(self)
-        self.plot_frame.grid(column=0, row=8, columnspan=6, padx=10, pady=10)
-
-        self.fig, self.ax = plt.subplots()
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
-        self.canvas.get_tk_widget().grid(row=0, column=0, padx=0, pady=0)
-
-        # Create a Matplotlib Figure object
-        #self.fig = Figure(figsize=(5, 4), dpi=100)
-        #self.ax = self.fig.add_subplot(111)
-        self.ax.set_title("Output Voltage Plot")
-        self.ax.set_xlabel("Current (A)")
-        self.ax.set_ylabel("Voltage (kV)")
-        #self.ax.legend()
-        self.ax.set_xlim(0, 4)  # Fix the x-axis from 0 to 4
-        self.ax.set_ylim(0, 2)  # Fix the y-axis from 0 to 2
-
-        # Embed the figure in the Tkinter Frame
-        #self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
-        #self.canvas.draw()
-        #self.canvas.get_tk_widget().grid(row=0, column=0, padx=0, pady=0)
-
-        # Plot data (example: simple line plot)
-        self.x_data1 = []
-        self.y_data1 = []
-
-        # Initial data for the second plot reference line
-        # means at 0.6 A s/b 400 V and at 2.8 A s/b 1600 V
-        self.x_data2 = [0.6, 2.8]
-        self.y_data2 = [0.4, 1.6]
-
-        # Create a matplotlib figure
-        #plt.ion()
-        #fig, ax = plt.subplots()
-        self.line1, = self.ax.plot(self.x_data1, self.y_data1, marker='o', label="Actual", color="blue")  # First plot line
-        self.line2, = self.ax.plot(self.x_data2, self.y_data2, label="Min Line", color="green")  # Second plot line
-        self.ax.legend()
-
-
-        self.update_plot_1(0,0)
-        #self.update_plot(1, 0.5)
-        #self.update_plot(2, 1)
-        #self.update_plot(2.5, 1.5)
-
-
-        #fig = Figure(figsize=(6, 4), dpi=100)
-        #ax = fig.add_subplot(111)
-
-        #ax.plot(x, y)
-        #set plot limits
-        #ax.set_xlim(0, 4)  # Fix the x-axis from 0 to 4
-        #ax.set_ylim(0, 2)  # Fix the y-axis from 0 to 2
-
-        # Set title and labels
-        #ax.set_title("Sample Line Plot")
-        #ax.set_xlabel("Current (A)")
-        #ax.set_ylabel("Voltage (kV)")
-        #ax.legend()
-
-        # Create a canvas for the figure in tkinter
-        #canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
-        # Display the canvas in the tkinter window
-        #canvas_widget = canvas.get_tk_widget()
-        #canvas_widget.grid()
 
         self.barno_entry.focus()
         #self.after(100, self.monitor_thread)
@@ -367,25 +289,13 @@ class outputView(tk.Frame):
         else:
             self.after(50, self.monitor_thread)  # Continue checking the queue
 
-    def print_chart(self):
-        # test values
-        #C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\Test Data\Output_Test\Auto Output Chart r3.xlsm
-        #C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\AutoOutput\Test Data\Output_Test\3509y
-        base_path = r"C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\AutoOutput"
-        bar_num = "7998Y"
-        part_num = "95073"
-        self.print_excel_charts(base_path, bar_num, part_num)
-        # todo real call below - check file path will match
-        #self.print_excel_charts(self, gb.testInfo.filePath, gb.testInfo.barNum, gb.testInfo.partNum)
-
+    def check_temp(self):
         pass
 
 
     def process_update(self, update):
         if update['type'] == 'label':
             self.update_label(update['label_name'],update['value'], update['color'])
-        elif update['type'] == 'plot':
-            self.update_plot_1(update['x_data'], update['y_data'])
 
     def update_label(self, label, value, color):
         if label == 'voltagein':
@@ -394,15 +304,13 @@ class outputView(tk.Frame):
             self.pulsewidth.set(value)
         elif label == "ipk":
             self.peakcurrent.set(value)
-        elif label == "vdss":
-            self.vdss.set(value)
         elif label == "vout":
             self.voltageout.set(value)
         elif label == "testtime":
             self.testtime.set(value)
         elif label == "finaltemp":
             self.finaltemp.set(value)
-        elif label == "lpulsespec":
+        elif label == "lpulse":
             self.lpulse.set(value)
         elif label == "voutlp":
             self.voltageoutlp.set(value)
@@ -411,60 +319,48 @@ class outputView(tk.Frame):
             #gb.testData.status = value
             self.statusLabel.config(text=value, background=color)
 
-    def update_plot_1(self, new_x, new_y):
-        self.x_data1.append(new_x)
-        self.y_data1.append(new_y)
-        #self.ax.plot(self.x_data1, self.y_data1, marker='o')
-        self.line1.set_data(self.x_data1, self.y_data1)
-        self.canvas.draw()
-
-    def clear_plot_1(self):
-        self.line1.remove()
-        # recreate line 1
-        self.x_data1 = []
-        self.y_data1 = []
-        self.line1, = self.ax.plot(self.x_data1, self.y_data1, marker='o', label="Actual",
-                                   color="blue")  # First plot line
-        self.update_plot_1(0, 0)
-        self.canvas.draw()
-
-    def plot_reference_line(self):
-        self.line2.remove()
-        # get data and split
-        point_set = [num for num in gb.testLimits['outputGraphline'].split(',') if num]
-        points = [float(num) for num in point_set]
-        print(points)
-        self.x_data2 = [points[0], points[2]]
-        self.y_data2 = [points[1], points[3]]
-        self.line2, = self.ax.plot(self.x_data2, self.y_data2, label="Min Line", color="green")
-        self.canvas.draw()
-
     def update_dynamic_line(self, x, y):
         self.line1.set_data(x,y)
         self.canvas.draw()
 
     def on_mintemp_change(self, *args):
-        gb.testInfo.minTemp = float(self.mintemp.get())
+        try:
+            gb.testInfo.minTemp = float(self.mintemp.get().strip())
+        except ValueError:
+            gb.testInfo.minTemp = 0.0
 
     def on_maxtemp_change(self, *args):
-        gb.testInfo.maxTemp = float(self.maxtemp.get())
+        try:
+            gb.testInfo.maxTemp = float(self.maxtemp.get().strip())
+        except ValueError:
+            gb.testInfo.maxTemp = 0.0
 
-    def on_currentlimit_change(self, *args):
-        gb.testInfo.thresholdCurrent = float(self.currentlimit.get())
+    def on_setTemp_change(self, *args):
+        #print(f"setTemp value: '{self.setTemp.get()}'")
+        try:
+            gb.testInfo.setTemp = float(self.setTemp.get().strip())
+        except ValueError:
+            gb.testInfo.setTemp = 0.0
 
-    def on_voltagelimit_change(self, *args):
-        gb.testInfo.thresholdVoltage = float(self.voltagelimit.get())
+    def on_setTempRange_change(self, *args):
+        #print(f"setTempRange value: '{self.setTempRange.get()}'")
+        try:
+            gb.testInfo.setTempRange = float(self.setTempRange.get().strip())
+        except ValueError:
+            #print("set range to zero.")
+            gb.testInfo.setTempRange = 0.0
 
-    def on_testinterval_change(self, *args):
-        text = self.testinterval.get()
-        # Strip whitespace and check if empty
-        gb.testInfo.testInterval = float(text.strip()) if text.strip() else 0.0
+    def on_preheat_change(self):
+        if self.preheatOn.get():
+            self.setTemp_entry.config(state='enabled')
+            self.setTempRange_entry.config(state='enabled')
+        else:
+            self.setTemp_entry.config(state='disabled')
+            self.setTempRange_entry.config(state='disabled')
 
-    def on_setcurrent_change(self, *args):
-        gb.testInfo.testCurrent = float(self.setcurrent.get())
+    def on_test_selection(self, *args):
+        pass
 
-    def on_lpulsecurrent_change(self, *args):
-        gb.testInfo.lpulseCurrent = float(self.lpulsecurrent.get())
 
         # subroutines here first
     def do_something(self):
@@ -472,9 +368,6 @@ class outputView(tk.Frame):
 
     def settings_window(self):
         newView = SetupView(self)
-
-    def gpib_addressing(self):
-        gpib_view = GpibView(self)
 
     def debug_mode(self):
         if gb.system.debugMode:
@@ -537,9 +430,6 @@ class outputView(tk.Frame):
         self.clear_display()
         # gets test limits/parameters
         gb.testLimits = dbase.load_test_limits(self.partno.get())
-        # print(gb.testLimits)
-        # plot reference line
-        self.plot_reference_line()
         # gets good part list
         self.partList = dbase.get_good_part_list(gb.testInfo.barNum)
         # print(self.partList)
@@ -588,7 +478,6 @@ class outputView(tk.Frame):
 
         # clear test result fields
         self.clear_display()
-        self.clear_plot_1()
 
         # status
         self.statusLabel.config(text="Testing", background="yellow")
@@ -596,7 +485,7 @@ class outputView(tk.Frame):
 
         # run test with reference to this instance
         self.done_event.clear()
-        self.test_thread = threading.Thread(target=test_output, args=(self.queue, self.done_event, self.check_stop_flag), daemon=True)
+        self.test_thread = threading.Thread(target=test_pulse, args=(self.queue, self.done_event, self.check_stop_flag, self.preheatOn), daemon=True)
         self.test_thread.start()
         self.after(100, self.monitor_thread)
         # self.check_thread()
@@ -780,102 +669,19 @@ class outputView(tk.Frame):
         self.voltagein.set('')
         self.peakcurrent.set('')
         self.pulsewidth.set('')
-        self.voltageoutlp.set('')
         self.testtime.set('')
         self.finaltemp.set('')
         self.lpulse.set('')
         self.voltageout.set('')
-        self.vdss.set('')
 
     def print_test_info(self):
-        # dumps testinfo for checking
+        # dumps testinno for checking
         print("Instance Attributes and Their Values:")
         for attr in dir(gb.testInfo):
             if not attr.startswith("__"):  # Filter out special methods
                 value = getattr(gb.testInfo, attr)
                 print(f"{attr}: {value}")
 
-    def print_excel_charts(self, base_path, bar_num, part_num):
-        try:
-            # Define file paths
-            # todo excel file should be a global init value
-            # base_path = gb.initValues.
-            # test_data_folder = gb.initValues.
-            # chart_folder = gb.initValues.
-            # excel_chart_filename = gb.initValues.
-            template_file = os.path.join(base_path, "Test Data", "Auto Output Chart r3.xlsm")
-            data_dir = os.path.join(base_path, "Test Data", "Output_Test", bar_num, "*.csv")
-            data_path = os.path.join(base_path, "Test Data", "Output_Test", bar_num)
-            chart_file = os.path.join(base_path, "95_series", part_num, "Test Data", f"{bar_num} Output Chart.xlsm")
-            #"C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\AutoOutput\95_series\95073\Test Data\7998Y Output Chart.xls"
-
-            # Get the list of CSV files
-            data_files = []
-            for file in os.listdir(data_path):
-                if file.endswith(".csv"):
-                    data_files.append(os.path.join(data_path, file))
-
-            # Ensure we have data files to process
-            if not data_files:
-                print("No data files found.")
-                return
-
-            # Start Excel
-            xlapp = win32.Dispatch("Excel.Application")
-            xlapp.Visible = True  # Make Excel visible for debugging
-
-            # Open the template file
-            xlbook = xlapp.Workbooks.Open(template_file)
-
-            # Call the macro to load data
-            #data_files = [r'C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\AutoOutput\Test Data\Output_Test\3509Y\20100518_102633_3509YD50x01.csv', 'C:\\Users\\gslam\\Dropbox\\SlamaTech\\Consulting\\AUTO Programs Python\\AutoOutput\\Test Data\\Output_Test\\3509Y\\20100518_102821_3509YD50x02.csv']
-            #print (part_num)
-            #print (data_files)
-            xlapp.Run("Module2.LoadFiles", data_files, part_num)
-
-            # Call the macro to save the chart file
-            xlapp.Run("Module2.SaveChartFile", chart_file)
-
-            # Call the macro to print charts
-            xlapp.Run("Module2.PrintCharts")
-
-            # Close Excel
-            xlapp.Quit()
-            print("Process completed successfully.")
-
-        except Exception as e:
-            print(f"An error occurred: {e}")
-
-
-def run_excel_macro():
-        try:
-            # todo Path to Excel file
-            excel_file = r"C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\Test Data\Output_Test\Auto Output Chart r3.xlsm"
-
-            # Macro name (include the module name if needed, e.g., 'Module1.MyMacro')
-            macro_name = "CommandButton1_Click1"
-
-            # Open Excel
-            excel = win32.Dispatch("Excel.Application")
-            excel.Visible = True  # Set to True to see Excel open
-
-            # Open the workbook
-            workbook = excel.Workbooks.Open(excel_file)
-
-            # Run the macro
-            excel.Application.Run(macro_name)
-
-            # Save and close the workbook
-            workbook.Save()
-            workbook.Close()
-
-            # Quit Excel
-            excel.Quit()
-
-            messagebox.showinfo("Success", "Macro ran successfully!")
-
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to run macro: {e}")
 
 class SetupView(tk.Toplevel):
     """
@@ -915,37 +721,20 @@ class SetupView(tk.Toplevel):
         pulse_gen_period.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="we")
         ttk.Label(pulsefrm, text="Period").grid(column=1, row=0, sticky="w")
 
-
-        self.pulse_gen_start_width = tk.StringVar()
-        self.pulse_gen_start_width.set(gb.testInfo.pulseStart)
-        self.pulse_gen_start_width.trace_add("write", self.on_pulse_gen_start_width_change)
-        pulse_gen_start_width_entry = ttk.Entry(pulsefrm, width=7, textvariable=self.pulse_gen_start_width)
-        pulse_gen_start_width_entry.grid(column=0, row=1, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(pulsefrm, text="Start Width").grid(column=1, row=1, sticky="w")
-
-
         self.pulse_gen_stop_width = tk.StringVar()
         self.pulse_gen_stop_width.set(gb.testInfo.pulseStop)
         self.pulse_gen_stop_width.trace_add("write", self.on_pulse_gen_stop_width_change)
         pulse_gen_stop_width_entry = ttk.Entry(pulsefrm, width=7, textvariable=self.pulse_gen_stop_width)
-        pulse_gen_stop_width_entry.grid(column=0, row=2, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(pulsefrm, text="Stop Width").grid(column=1, row=2, sticky="w")
-
-
-        self.pulse_gen_step = tk.StringVar()
-        self.pulse_gen_step.set(gb.testInfo.pulseStep)
-        self.pulse_gen_step.trace_add("write", self.on_pulse_gen_step_change)
-        pulse_gen_step_entry = ttk.Entry(pulsefrm, width=7, textvariable=self.pulse_gen_step)
-        pulse_gen_step_entry.grid(column=0, row=3, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(pulsefrm, text="Step").grid(column=1, row=3, sticky="w")
+        pulse_gen_stop_width_entry.grid(column=0, row=1, padx=(0, 5), pady=5, sticky="we")
+        ttk.Label(pulsefrm, text="Stop Width").grid(column=1, row=1, sticky="w")
 
 
         self.pulse_gen_units = tk.StringVar()
         self.pulse_gen_units.set(gb.testInfo.pulseUnits)
         self.pulse_gen_units.trace_add("write", self.on_pulse_gen_units_change)
         pulse_gen_units_entry = ttk.Entry(pulsefrm, width=7, textvariable=self.pulse_gen_units)
-        pulse_gen_units_entry.grid(column=0, row=4, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(pulsefrm, text="Units").grid(column=1, row=4, sticky="w")
+        pulse_gen_units_entry.grid(column=0, row=2, padx=(0, 5), pady=5, sticky="we")
+        ttk.Label(pulsefrm, text="Units").grid(column=1, row=2, sticky="w")
 
 
 
@@ -975,49 +764,20 @@ class SetupView(tk.Toplevel):
         scopefrm.grid(column=5, row=1, columnspan=2, padx=10, pady=10, sticky="nwe")
         #scopefrm.columnconfigure(0, weight=3)
 
-        self.scope_vdss_chan = tk.StringVar()
-        self.scope_vdss_chan.set(gb.testInfo.vdssChan)
-        self.scope_vdss_chan.trace_add("write", self.on_scope_vdss_chan_change)
-        scope_vdss_chan_entry = ttk.Entry(scopefrm, width=7, textvariable=self.scope_vdss_chan)
-        scope_vdss_chan_entry.grid(column=0, row=0, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(scopefrm, text="Vdss Chan").grid(column=1, row=0, sticky="w")
-
-        self.scope_vdss_scale = tk.StringVar()
-        self.scope_vdss_scale.set(gb.testInfo.vdssScale)
-        self.scope_vdss_scale.trace_add("write", self.on_scope_vdss_scale_change)
-        scope_vdss_scale_entry = ttk.Entry(scopefrm, width=7, textvariable=self.scope_vdss_scale)
-        scope_vdss_scale_entry.grid(column=0, row=1, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(scopefrm, text="Vdss V/div").grid(column=1, row=1, sticky="w")
-
 
         self.scope_current_chan = tk.StringVar()
         self.scope_current_chan.set(gb.testInfo.currentChan)
         self.scope_current_chan.trace_add("write", self.on_scope_current_chan_change)
         scope_current_chan_entry = ttk.Entry(scopefrm, width=7, textvariable=self.scope_current_chan)
-        scope_current_chan_entry.grid(column=0, row=2, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(scopefrm, text="Current Chan").grid(column=1, row=2, sticky="w")
+        scope_current_chan_entry.grid(column=0, row=0, padx=(0, 10), pady=5, sticky="we")
+        ttk.Label(scopefrm, text="Current Chan").grid(column=1, row=0, sticky="w")
 
         self.scope_current_scale = tk.StringVar()
         self.scope_current_scale.set(gb.testInfo.currentScale)
         self.scope_current_scale.trace_add("write", self.on_scope_current_scale_change)
         scope_current_scale_entry = ttk.Entry(scopefrm, width=7, textvariable=self.scope_current_scale)
-        scope_current_scale_entry.grid(column=0, row=3, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(scopefrm, text="Current V/div").grid(column=1, row=3, sticky="w")
-
-
-        self.scope_vout_chan = tk.StringVar()
-        self.scope_vout_chan.set(gb.testInfo.voutChan)
-        self.scope_vout_chan.trace_add("write", self.on_scope_vout_chan_change)
-        scope_vout_chan_entry = ttk.Entry(scopefrm, width=7, textvariable=self.scope_vout_chan)
-        scope_vout_chan_entry.grid(column=0, row=4, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(scopefrm, text="Vout Chan").grid(column=1, row=4, sticky="w")
-
-        self.scope_vout_scale = tk.StringVar()
-        self.scope_vout_scale.set(gb.testInfo.voutScale)
-        self.scope_vout_scale.trace_add("write", self.on_scope_vout_scale_change)
-        scope_vout_scale_entry = ttk.Entry(scopefrm, width=7, textvariable=self.scope_vout_scale)
-        scope_vout_scale_entry.grid(column=0, row=5, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(scopefrm, text="Vout V/div").grid(column=1, row=5, sticky="w")
+        scope_current_scale_entry.grid(column=0, row=1, padx=(0, 10), pady=5, sticky="we")
+        ttk.Label(scopefrm, text="Current V/div").grid(column=1, row=1, sticky="w")
 
 
         # power supply frame
@@ -1039,7 +799,6 @@ class SetupView(tk.Toplevel):
         power_current_entry.grid(column=0, row=1, padx=(0, 10), pady=5, sticky="we")
         ttk.Label(powerfrm, text="CH1 Current").grid(column=1, row=1, sticky="w")
 
-
         self.power_voltage_2 = tk.StringVar()
         self.power_voltage_2.set(gb.testInfo.vaux)
         self.power_voltage_2.trace_add("write", self.on_power_voltage_2_change)
@@ -1055,10 +814,9 @@ class SetupView(tk.Toplevel):
         ttk.Label(powerfrm, text="CH2 Current").grid(column=1, row=3, sticky="w")
 
 
-
         # voltage divider ratio frame
         self.voltage_option = tk.StringVar()
-        self.voltage_option.set('2000V')
+        self.voltage_option.set('1200V')
         self.voltage_ratio = tk.StringVar()
         self.voltage_ratio.set(gb.testInfo.voltageRatio)
 
@@ -1066,29 +824,33 @@ class SetupView(tk.Toplevel):
         voltagefrm.grid(column=0, row=2, columnspan=2, padx=10, pady=10, sticky="nwe")
         #voltagefrm.columnconfigure(0, weight=1)
 
-        ttk.Radiobutton(voltagefrm, text='2000 V (249 k)', variable=self.voltage_option, value='2000V',
+        ttk.Radiobutton(voltagefrm, text='1200 V (178 k)', variable=self.voltage_option, value='1200V',
                         command=self.voltage_ratio).grid(column=0, row=0, padx=20, sticky=tk.W)
 
+        ttk.Radiobutton(voltagefrm, text='1400 V (150 k)', variable=self.voltage_option, value='1400V',
+                        command=self.voltage_ratio).grid(column=0, row=1, padx=20, sticky=tk.W)
+
+        ttk.Radiobutton(voltagefrm, text='2000 V (249 k)', variable=self.voltage_option, value='2000V',
+                        command=self.voltage_ratio).grid(column=0, row=2, padx=20, sticky=tk.W)
+
         ttk.Radiobutton(voltagefrm, text='Other', variable=self.voltage_option, value='Other',
-                        command=self.voltage_other).grid(column=0, row=1, padx=20, sticky=tk.W)
+                        command=self.voltage_other).grid(column=0, row=3, padx=20, sticky=tk.W)
 
         self.voltage_ratio = tk.StringVar()
         self.voltage_ratio.set(gb.testInfo.voltageRatio)
         self.voltage_ratio_entry = ttk.Entry(voltagefrm, width=7, textvariable=self.voltage_ratio)
-        self.voltage_ratio_entry.grid(column=0, row=2, padx=(0, 10), pady=5, sticky="we")
+        self.voltage_ratio_entry.grid(column=0, row=4, padx=(0, 10), pady=5, sticky="we")
         self.voltage_ratio_entry.config(state="disabled")
-        ttk.Label(voltagefrm, text="V/1V").grid(column=1, row=2, sticky="w")
-
+        ttk.Label(voltagefrm, text="V/1V").grid(column=1, row=4, sticky="w")
 
         # current probe frame
-        self.current_option = tk.StringVar(value='P6021')
+        self.current_option = tk.StringVar(value='1.5 A (0.604R)')
         self.current_scale = tk.StringVar()
         self.current_scale.set(gb.testInfo.currentRatio)
         self.option_map = {
-            '2.7 A (0.332R)': 328,
             '1.5 A (0.604R)': 597,
-            'TCP202': 1000,
-            'P6021': 100,
+            '2.4 A (0.374R)': 111,  #todo need the right number here
+            '2.7 A (0.332R)': 328,
             'Other': None
         }
         currentfrm = ttk.LabelFrame(self, text=" Current Measurement ", width=200, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
@@ -1099,17 +861,9 @@ class SetupView(tk.Toplevel):
             ttk.Radiobutton(currentfrm, text=label, value=label, variable=self.current_option, command=self.on_current_selection
             ).grid(row=i, column=0, sticky="w", padx=10, pady=2)
 
-        #ttk.Radiobutton(currentfrm, text='2.7 A (0.33 R)', variable=self.currentOption, value='27A',command=self.current_option).grid(column=0, row=0, padx=20, sticky=tk.W)
-
-        #ttk.Radiobutton(currentfrm, text='TCP202', variable=self.currentOption, value='TCP202',command=self.current_option).grid(column=0, row=1, padx=20, sticky=tk.W)
-
-        #ttk.Radiobutton(currentfrm, text='P6021', variable=self.currentOption, value='P6021',command=self.current_option).grid(column=0, row=3, padx=20, sticky=tk.W)
-
-        #ttk.Radiobutton(currentfrm, text='Other', variable=self.currentOption, value='Other',command=self.current_other).grid(column=0, row=4, padx=20, sticky=tk.W)
-
         self.current_scale_entry = ttk.Entry(currentfrm, width=7)
         self.current_scale_entry.grid(column=0, row=5, padx=(0, 10), pady=5, sticky="we")
-        self.current_scale_entry.insert(0, str(self.option_map['P6021']))
+        self.current_scale_entry.insert(0, str(self.option_map['1.5 A (0.604R)']))
         self.current_scale_entry.config(state="disabled")
         ttk.Label(currentfrm, text="mV/A").grid(column=1, row=5, sticky="w")
 
@@ -1213,19 +967,16 @@ class SetupView(tk.Toplevel):
         gb.testInfo.currentProbe = self.current_option.get()
         print(f'currentRatio1: {gb.testInfo.currentRatio}')
 
-
     def current_other(self):
         # here activate other text box
         self.current_scale_entry.config(state="enabled")
         gb.testInfo.currentRatio = self.current_scale.get()
         print(f'currentRatio2: {gb.testInfo.currentRatio}')
 
-
     def voltage_ratio(self):
         # here update current ratio test box but leave gray
         self.voltage_ratio_entry.config(state="disabled")
         gb.testInfo.voltageRatio = self.voltage_ratio.get()
-
 
     def voltage_other(self):
         # here activate other text box
@@ -1234,60 +985,3 @@ class SetupView(tk.Toplevel):
 
 
 
-class GpibView(tk.Toplevel):
-    """
-    Defines window for for instrument settings and board settings
-    """
-    def __init__(self, parent, *args, **kwargs):
-        super().__init__(parent, *args, **kwargs)
-
-        # Create a new top-level window
-        self.title('GPIB Addressing')
-        self.geometry("400x250+250+300")
-        self.style = ttk.Style()
-        self.style.configure("Normal", bg="white")
-        self.style.configure("Error", bg="red")
-
-
-        self.pulse_gen_ieee_adr = tk.StringVar()
-        self.pulse_gen_ieee_adr.set(gb.initValues.sigGenAdr)
-        self.pulse_gen_ieee_adr.trace_add("write", self.pulse_gen_ieee_adr_change)
-        pulse_gen_ieee_adr_entry = ttk.Entry(self, width=35, textvariable=self.pulse_gen_ieee_adr)
-        pulse_gen_ieee_adr_entry.grid(column=1, row=1, padx=(10, 10), pady=5, sticky="we")
-        ttk.Label(self, text="Pulse Generator").grid(column=0, row=1, padx=(10,0), sticky="e")
-
-        self.power_ieee_adr = tk.StringVar()
-        self.power_ieee_adr.set(gb.initValues.powerAdr)
-        self.power_ieee_adr.trace_add("write", self.power_ieee_adr_change)
-        power_ieee_adr_entry = ttk.Entry(self, width=35, textvariable=self.power_ieee_adr)
-        power_ieee_adr_entry.grid(column=1, row=2, padx=(10, 10), pady=5, sticky="we")
-        ttk.Label(self, text="Power Supply").grid(column=0, row=2, padx=(10,0), sticky="e")
-
-        self.scanner_ieee_adr = tk.StringVar()
-        self.scanner_ieee_adr.set(gb.initValues.scannerAdr)
-        self.scanner_ieee_adr.trace_add("write", self.scanner_ieee_adr_change)
-        scanner_ieee_adr_entry = ttk.Entry(self, width=35, textvariable=self.scanner_ieee_adr)
-        scanner_ieee_adr_entry.grid(column=1, row=3, padx=(10, 10), pady=5, sticky="we")
-        ttk.Label(self, text="Data Scanner").grid(column=0, row=3, padx=(10,0), sticky="e")
-
-        self.scope_ieee_adr = tk.StringVar()
-        self.scope_ieee_adr.set(gb.initValues.scopeAdr)
-        self.scope_ieee_adr.trace_add("write", self.scope_ieee_adr_change)
-        scope_ieee_adr_entry = ttk.Entry(self, width=35, textvariable=self.scope_ieee_adr)
-        scope_ieee_adr_entry.grid(column=1, row=4, padx=(10, 10), pady=5, sticky="we")
-        ttk.Label(self, text="Oscilloscope").grid(column=0, row=4, padx=(10,0), sticky="e")
-
-        # Add a button to save settings and close the window
-        ttk.Button(self, text="Close", command=self.destroy).grid(column=1, row=5, padx=10, pady=10, sticky="we")
-
-    def pulse_gen_ieee_adr_change(self, *args):
-        gb.initValues.sigGenAdr = self.power_ieee_adr.get()
-
-    def power_ieee_adr_change(self, *args):
-        gb.initValues.powerAdr = self.power_ieee_adr.get()
-
-    def scanner_ieee_adr_change(self, *args):
-        gb.initValues.scannerAdr = self.scanner_ieee_adr.get()
-
-    def scope_ieee_adr_change(self, *args):
-        gb.initValues.scopeAdr = self.scope_ieee_adr.get()

@@ -6,7 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="9cec9493-59ae-42fd-8ba3-96c44ce46bf0" name="Changes" comment="- lots of debug fixes&#10;- adapted scanner and meter to do temperature only&#10;- scope chan 4 does output voltage&#10;- adjusted setup page&#10;- corrected ending program&#10;- this does compile into an exe">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autoOutput.py" beforeDir="false" afterPath="$PROJECT_DIR$/autoPulse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainView.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainView.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Oscilloscopes/sds824xhd.py" beforeDir="false" afterPath="$PROJECT_DIR$/Oscilloscopes/sds824xhd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SignalGenerators/sdg2042x.py" beforeDir="false" afterPath="$PROJECT_DIR$/SignalGenerators/sdg2042x.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestRoutines.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestRoutines.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autoPulse.py" beforeDir="false" afterPath="$PROJECT_DIR$/autoPulse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autoPulse.spec" beforeDir="false" afterPath="$PROJECT_DIR$/autoPulse.spec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/globals.py" beforeDir="false" afterPath="$PROJECT_DIR$/globals.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,6 +62,7 @@
     "Python.TestRoutines.executor": "Debug",
     "Python.__init__.executor": "Run",
     "Python.autoOutput.executor": "Debug",
+    "Python.autoPulse.executor": "Debug",
     "Python.excel_test.executor": "Debug",
     "Python.main.executor": "Debug",
     "Python.models.executor": "Run",
@@ -66,7 +73,7 @@
     "Python.testplot2.executor": "Debug",
     "Python.testplot3.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "Multi__instr",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/gslam/Dropbox/SlamaTech/Consulting/AUTO Programs Python/AutoPulseInductance/Source",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
@@ -274,6 +281,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/TestRoutines.py</url>
+          <line>554</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">

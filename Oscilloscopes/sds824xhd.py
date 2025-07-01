@@ -112,8 +112,8 @@ class SDS824XHD(Scope):
         self.visa_session.write(f'CHAN{chan}:IMP {impedance.upper()}')
 
     def set_trigger_mode(self, mode):
-        # NORM,
-        self.visa_session.write(f'TRIG:MODE {mode}')
+        # NORM, SINGLE, AUTO
+        self.visa_session.write(f':TRIG:MODE {mode}')
 
     def set_trigger_type(self, type):
         # EDGE,
@@ -125,7 +125,7 @@ class SDS824XHD(Scope):
         self.visa_session.write(f'TRIG:EDGE:SOUR C{chan}')
 
     def set_trigger_level(self, level):
-        # voltafe
+        # voltage
         self.visa_session.write(f'TRIG:EDGE:LEV {level}')
 
     def set_trigger_coupling(self, coupling):
@@ -137,7 +137,7 @@ class SDS824XHD(Scope):
         self.visa_session.write(f'TRIG:EDGE:COUPLING {coupling}')
 
     def set_trigger_edge(self, slope):
-        # RISE,
+        # RIS, FALL
         self.visa_session.write(f'TRIG:EDGE:SLOPE {slope}')
 
     def set_aquire_stopafter(self, stop):
@@ -181,6 +181,7 @@ class SDS824XHD(Scope):
         self.visa_session.write(f'MEAS:MODE ADV')
 
     def set_meas_type(self, num, type):
+        # P (num) is measurement number 1 to 8
         # PKPK,MAX,MIN,TOP,MEAN,DUTY,WID,PER,etc
         self.visa_session.write(f'MEAS:ADV:P{num}:TYPE {type}')
 

@@ -103,8 +103,8 @@ class CLtestInfo(object):
         self.currentScale = "0.50"
         self.voutChan = "4"
         self.voutScale = "0.5"
-        self.currentRatio = 100
-        self.currentProbe = "P6021"
+        self.currentRatio = 597
+        self.currentProbe = "1.5 A (0.604R)"
         self.voltageRatio = 562.8
         self.pulsePeriod = 20
         self.pulseWidth = None
@@ -123,6 +123,8 @@ class CLtestInfo(object):
         self.currentLimit = 2
         self.vaux = 5.3
         self.iaux = 1
+        self.setTemp = 85
+        self.setTempRange = 1
 
 
 def update_from_dict(self, data):
