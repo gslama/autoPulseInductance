@@ -8,13 +8,14 @@ import array as arr
 from enum import Enum
 from dataclasses import dataclass
 
-# decalre variables for instrumemts
+# declare variables for instrumemts
 lcr = None
 hipot = None
 scope = None
 sig_gen = None
 power = None
 meter = None
+thermo = None
 
 
 class CLsystem(object):
@@ -54,12 +55,16 @@ class CLinitValues(object):
         self.hipotAdr = ""
         self.scopeMeter = "SDS824X"
         self.scopeAdr = ""
+        self.meterUnit = "SDM3055SC"
+        self.meterAdr = ""
         self.sigGen = "SDG2042X"
         self.sigGenAdr = ""
         self.powerUnit = "GPP4323"
         self.powerAdr = ""
         self.scannerUnit = "HP34970A"
         self.scannerAdr = ""
+        self.thermoUnit = "USB2001TC"
+        self.thermoAdr = "1"
         self.boardNum = "0"
         self.commPort = "4"
         self.lcrXfmrLevel = "0.5"
@@ -68,6 +73,8 @@ class CLinitValues(object):
         self.lcrCalLevel = "0.5"
         self.lcrBias = "0"
         self.debugLcr = 1
+        self.ipeakLo = 0.9
+        self.ipeakHi = 1.1
 
 @dataclass
 class CLtestInfo(object):
@@ -125,6 +132,7 @@ class CLtestInfo(object):
         self.iaux = 1
         self.setTemp = 85
         self.setTempRange = 1
+        self.preheat = False
 
 
 def update_from_dict(self, data):

@@ -84,7 +84,6 @@ class outputView(tk.Frame):
         menubar.add_cascade(label="Options", menu=optionsmenu)
 
         helpmenu = tk.Menu(menubar, tearoff=False)
-        helpmenu.add_command(label="About", command=self.show_about)
         helpmenu.add_command(label="Instructions", command=self.show_instructions)
         menubar.add_cascade(label="Help", menu=helpmenu)
 
@@ -164,6 +163,7 @@ class outputView(tk.Frame):
         self.preheatOn = tk.BooleanVar()
         checkbox = tk.Checkbutton(thresholdfrm, text="Preheat On", variable=self.preheatOn, command=self.on_preheat_change)
         checkbox.grid(row=3, column=0, sticky='w', padx=5, pady=5)
+
         self.setTemp = tk.StringVar()
         self.setTemp.set(gb.testInfo.setTemp)
         self.setTemp.trace_add("write", self.on_setTemp_change)
@@ -215,6 +215,9 @@ class outputView(tk.Frame):
         self.testtime_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.testtime)
         self.testtime_entry.grid(column=1, row=3, padx=(0, 10), pady=5, sticky="we")
         ttk.Label(readingfrm, text="Test Time (s))").grid(column=1, row=2)
+
+        gb.testData.finalTemp = gb.thermo.get_measurement(1)
+        print(f'temp: {gb.testData.finalTemp}')
 
         self.finaltemp = tk.StringVar()
         self.finaltemp.set(gb.testData.finalTemp)
@@ -290,6 +293,8 @@ class outputView(tk.Frame):
             self.after(50, self.monitor_thread)  # Continue checking the queue
 
     def check_temp(self):
+        gb.testData.finalTemp = gb.thermo.get_measurement(1)
+        self.update_label('finaltemp', f"{gb.testData.finalTemp:.1f}", "grey85")
         pass
 
 
@@ -354,9 +359,11 @@ class outputView(tk.Frame):
         if self.preheatOn.get():
             self.setTemp_entry.config(state='enabled')
             self.setTempRange_entry.config(state='enabled')
+            gb.testInfo.preheat = True
         else:
             self.setTemp_entry.config(state='disabled')
             self.setTempRange_entry.config(state='disabled')
+            gb.testInfo.preheat = False
 
     def on_test_selection(self, *args):
         pass
@@ -378,14 +385,6 @@ class outputView(tk.Frame):
             gb.system.debugMode = True
             self.master.title("AutoParameters - Debug Mode")
             print("debugMode ON")
-
-    def show_about(self):
-        print("showAbout")
-        # open window
-        window = aboutView(self)
-        # want to grab so mainview is not changed during testing
-        window.grab_set()
-
 
     def show_instructions(self):
         print("showInstructions")

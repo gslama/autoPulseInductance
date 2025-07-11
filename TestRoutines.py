@@ -427,7 +427,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
     status = 0
     gb.testData.lpulseSpecific = ''
 
-    # set power supply
+    # set power supply on
     power_set()
 
     # setup pulse generator
@@ -447,7 +447,8 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
 
     # check part temperature is in range
     # log_temp = float(get_temperature(instr_scan))
-    log_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+    #log_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+    log_temp = gb.thermo.get_measurement(1)
     while (log_temp < gb.testInfo.minTemp or log_temp > gb.testInfo.maxTemp):
         # display
         # if too cold wait by checking every 2 seconds
@@ -462,7 +463,8 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         # wait 2 seconds
         time.sleep(2)
         # log_temp = get_temperature(instr_scan)
-        log_temp = float(gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T'))
+        #log_temp = float(gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T'))
+        log_temp = gb.thermo.get_measurement(1)
         label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{log_temp:.1f}", 'color': "grey85"}
         update_queue.put(label_update)
 
@@ -473,34 +475,39 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
 
     # preheat sequence
     abort_flag = False
-    if preheat_on.get():
-
+    if gb.testInfo.preheat:
+        # status
         label_update = {'type': 'label', 'label_name': 'status', 'value': "PreHeat", 'color': "yellow"}
         update_queue.put(label_update)
 
-        # turn on power and signal generator
-        gb.sig_gen.set_output_state('OFF')
+        # turn on signal generator
         gb.sig_gen.set_output_state('ON')
 
         # wait a half second to stablize
         time.sleep(0.5)
 
         # monitor temperature until target
-        gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+        #gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+        gb.testData.finalTemp = gb.thermo.get_measurement(1)
         while gb.testData.finalTemp < gb.testInfo.setTemp:
             # display
             label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{gb.testData.finalTemp:.1f}",
                             'color': "grey85"}
             update_queue.put(label_update)
-            gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+            #gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+            gb.testData.finalTemp = gb.thermo.get_measurement(1)
 
             # check for abort - premature end of test
+            if stop_flag_callback():
+                print("Stop flag triggered")
+                abort_flag = True
+
             if abort_flag:
                 label_update = {'type': 'label', 'label_name': 'status', 'value': "Aborted", 'color': "red"}
                 update_queue.put(label_update)
                 # turn stuff off
                 gb.sig_gen.set_output_state('OFF')
-                gb.sig_gen.set_output_state('OFF')
+                gb.power.set_power_state(1, 'OFF')
                 # delay so shows up on display
                 time.sleep(0.2)
                 done_event.set()
@@ -518,6 +525,11 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
 
     # start main loop ==================================================
     for i in range(3):
+
+        if stop_flag_callback():
+            print("Stop flag triggered")
+            abort_flag = True
+
         # check for abort - premature end of test
         if abort_flag:
             label_update = {'type': 'label', 'label_name': 'status', 'value': "Aborted", 'color': "red"}
@@ -526,9 +538,6 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
             time.sleep(0.2)
             done_event.set()
             return
-
-        # set scope to one shot
-        #gb.scope.set_trigger_mode('SING')
 
         # start test
         gb.power.set_power_state(1, 'ON')
@@ -544,6 +553,12 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         label_update = {'type': 'label', 'label_name': 'voltagein', 'value': f"{gb.testData.vin:.2f}", 'color': "grey85"}
         update_queue.put(label_update)
 
+        # set scope to one shot
+        result = gb.scope.get_trigger_mode()
+        #print (result)
+        if 'SING' not in gb.scope.get_trigger_mode():
+            gb.scope.set_trigger_mode('SING')
+
         # pulse width sent in seconds to meter
         gb.sig_gen.set_pulse_width(round(pulse_width * pulse_units, 9))
         gb.testData.pulseWidth = pulse_width
@@ -555,11 +570,18 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         time.sleep(0.2)
 
         # get pulse width
-        meas_pulse_width = float(gb.scope.get_meas_value(2))
-        # get current
-        meas_ipk = float(gb.scope.get_meas_value(1))
-        # get output voltage
-        meas_vout = float(gb.scope.get_meas_value(3))
+        result = gb.scope.get_meas_value(2)
+        if "*" in result:
+            # error
+            gb.sig_gen.set_output_state('OFF')
+            abort_flag = True
+            break
+        else:
+            meas_pulse_width = float(gb.scope.get_meas_value(2))
+            # get current
+            meas_ipk = float(gb.scope.get_meas_value(1))
+            # get output voltage
+            meas_vout = float(gb.meter.get_meas_voltage('DC', 6))
 
         # turn off generator
         gb.sig_gen.set_output_state('OFF')
@@ -572,7 +594,8 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         print(f"test time: {gb.testData.testTime}")
 
         # get temperature
-        gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
+        #gb.testData.finalTemp = gb.scanner.get_meas_temp(gb.testInfo.tempChan, 'T')
+        gb.testData.finalTemp = gb.thermo.get_measurement(1)
         print(f'max_temp: {gb.testData.finalTemp}')
         # display
         label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{gb.testData.finalTemp:.1f}", 'color': "grey85"}
@@ -617,7 +640,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         #return
 
     # no primary pulse current - arbitrarily set to 400 mA
-    if meas_ipk < 0.40:
+    elif meas_ipk < 0.40:
         messagebox.showerror(title="Test Error", message="Primary Open. Check connections or part")
         abort_flag = True
         #return
@@ -631,7 +654,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
     else:
         target_ipk = 0
 
-    if meas_ipk < target_ipk * 0.9 or meas_ipk > target_ipk * 1.1:
+    if meas_ipk < target_ipk * float(gb.initValues['ipeakLo']) or meas_ipk > target_ipk * float(gb.initValues['ipeakHi']):
         messagebox.showerror(title="Test Error", message="Pulse width out of range. Check connections or part")
         abort_flag = True
         #return

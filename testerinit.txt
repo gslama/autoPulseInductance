@@ -27,10 +27,14 @@
 "powerAdr": "TCPIP0::192.168.88.92::inst0::INSTR",
 "scannerUnit": "HP34970A",
 "scannerAdr": "GPIB1::10::INSTR",
-"meterUnit":"HP34970A",
-"meterAdr": "GPIB1::10::INSTR",
+"meterUnit":"SDM3055",
+"meterAdr": "TCPIP0::192.168.88.68::inst0::INSTR",
+"thermoUnit": "USB2001TC",
+"thermoAdr": "1",
 "boardNum": "0",
 "debugMode": 0,
 "debugLcr": 0,
-"version": "1.0.0"
+"version": "1.0.0",
+"ipeakLo":"0.9",
+"ipeakHi":"1.15"
 }
