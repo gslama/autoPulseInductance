@@ -113,10 +113,13 @@ class SDS824XHD(Scope):
 
     def set_trigger_mode(self, mode):
         # NORM, SINGLE, AUTO
-        self.visa_session.write(f':TRIG:MODE {mode}')
+        self.visa_session.write(f'TRIG:MODE {mode}')
 
     def get_trigger_mode(self):
         return self.visa_session.query('TRIG:MODE?')
+
+    def get_trigger_status(self):
+        return self.visa_session.query('TRIG:STAT?')
 
     def set_trigger_type(self, type):
         # EDGE,

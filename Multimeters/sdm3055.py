@@ -70,9 +70,6 @@ class SDM3055(Meter):
         return data
 
 
-
-
-
     def get_meas_voltage(self, type, range = 'AUTO'):
         # measure a voltage
         # type = ac, dc

@@ -75,24 +75,24 @@ class outputView(tk.Frame):
         self.master.config(menu=menubar)
 
         filemenu = tk.Menu(menubar, tearoff=False)
-        filemenu.add_command(label="Exit", command=self.close_window)
         menubar.add_cascade(label="File", menu=filemenu)
+        filemenu.add_command(label="Exit", command=self.close_window)
 
         optionsmenu = tk.Menu(menubar, tearoff=False)
+        menubar.add_cascade(label="Edit", menu=optionsmenu)
         optionsmenu.add_command(label="Settings", command=self.settings_window)
         optionsmenu.add_command(label="Debug", command=self.debug_mode)
-        menubar.add_cascade(label="Options", menu=optionsmenu)
 
         helpmenu = tk.Menu(menubar, tearoff=False)
-        helpmenu.add_command(label="Instructions", command=self.show_instructions)
         menubar.add_cascade(label="Help", menu=helpmenu)
+        helpmenu.add_command(label="Instructions", command=self.show_instructions)
 
         # bar number
         self.barno = tk.StringVar()
         self.barno.set('8850Y')
         ttk.Label(self, text="Bar Number").grid(column=0, row=0, sticky="e", padx=5, pady=(10, 0))
         self.barno_entry = ttk.Entry(self, width=10, textvariable=self.barno, validate='focusout',
-                                     validatecommand=self.check_bar_no)
+                                     validatecommand=self.check_bar_no, font=("TkDefaultFont", 10, "bold"))
         self.barno_entry.grid(column=1, row=0, sticky="we", pady=(10, 0))
         #self.barno_entry.bind("<FocusOut>", self.checkBarNo)
         self.barno_entry.focus()
@@ -101,7 +101,7 @@ class outputView(tk.Frame):
         self.partno = tk.StringVar()
         self.partno.set('950xx')
         ttk.Label(self, text="Part Number").grid(column=2, row=0, padx=5, pady=(5,0),sticky="e")
-        self.partno_entry = ttk.Entry(self, width=10, takefocus=0, textvariable=self.partno)
+        self.partno_entry = ttk.Entry(self, width=10, takefocus=0, textvariable=self.partno, font=("TkDefaultFont", 10, "bold"))
         self.partno_entry.grid(column=3, row=0, sticky="we",pady=(5, 0))
         self.partno_entry.config(state="disabled")
 
@@ -110,7 +110,7 @@ class outputView(tk.Frame):
         self.serialLabel.grid(column=4, row=0, padx=5, pady=(5, 0), sticky="w")
         self.serialNum = tk.StringVar()
         self.serialNum.set('0')
-        ttk.Entry(self, width=6, takefocus=0, textvariable=self.serialNum).grid(column=5, row=0, sticky="w", padx=5, pady=5)
+        ttk.Entry(self, width=6, takefocus=0, textvariable=self.serialNum, font=("TkDefaultFont", 10, "bold")).grid(column=5, row=0, sticky="w", padx=5, pady=5)
 
         # test status
         self.teststatus = tk.StringVar()
@@ -125,8 +125,8 @@ class outputView(tk.Frame):
         self.test_option = tk.StringVar(value='Standard Test')
         self.option_map = {
             'Standard Test': 1,
-            'STX @ 25C': 2,
-            'STX @ 85C': 3
+            'STX @ 25°C': 2,
+            'STX @ 85°C': 3
         }
         testfrm = ttk.LabelFrame(self, text=" Test ", width=200, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
         testfrm.grid(column=0, row=1, columnspan=2, padx=10, pady=10, sticky="nwe")
@@ -149,16 +149,16 @@ class outputView(tk.Frame):
         self.mintemp = tk.StringVar()
         self.mintemp.set(gb.testInfo.minTemp)
         self.mintemp.trace_add("write", self.on_mintemp_change)
-        mintemp_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.mintemp)
+        mintemp_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.mintemp, font=("TkDefaultFont", 10, "bold"))
         mintemp_entry.grid(column=0, row=0, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(thresholdfrm, text="Min Temp (C)").grid(column=1, row=0, sticky="w")
+        ttk.Label(thresholdfrm, text="Min Temp (°C)").grid(column=1, row=0, sticky="w")
 
         self.maxtemp = tk.StringVar()
         self.maxtemp.set(gb.testInfo.maxTemp)
         self.maxtemp.trace_add("write", self.on_maxtemp_change)
-        maxtemp_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.maxtemp)
+        maxtemp_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.maxtemp, font=("TkDefaultFont", 10, "bold"))
         maxtemp_entry.grid(column=0, row=1, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(thresholdfrm, text="Max Temp (C)").grid(column=1, row=1, sticky="w")
+        ttk.Label(thresholdfrm, text="Max Temp (°C)").grid(column=1, row=1, sticky="w")
 
         self.preheatOn = tk.BooleanVar()
         checkbox = tk.Checkbutton(thresholdfrm, text="Preheat On", variable=self.preheatOn, command=self.on_preheat_change)
@@ -167,17 +167,17 @@ class outputView(tk.Frame):
         self.setTemp = tk.StringVar()
         self.setTemp.set(gb.testInfo.setTemp)
         self.setTemp.trace_add("write", self.on_setTemp_change)
-        self.setTemp_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.setTemp)
+        self.setTemp_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.setTemp, font=("TkDefaultFont", 10, "bold"))
         self.setTemp_entry.grid(column=0, row=4, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(thresholdfrm, text="Set Temp (C)").grid(column=1, row=4, sticky="w")
+        ttk.Label(thresholdfrm, text="Set Temp (°C)").grid(column=1, row=4, sticky="w")
         self.setTemp_entry.config(state='disabled')
 
         self.setTempRange = tk.StringVar()
         self.setTempRange.set(gb.testInfo.setTempRange)
         self.setTempRange.trace_add("write", self.on_setTempRange_change)
-        self.setTempRange_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.setTempRange)
+        self.setTempRange_entry = ttk.Entry(thresholdfrm, width=7, textvariable=self.setTempRange, font=("TkDefaultFont", 10, "bold"))
         self.setTempRange_entry.grid(column=0, row=5, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(thresholdfrm, text="Set Range (C)").grid(column=1, row=5, sticky="w")
+        ttk.Label(thresholdfrm, text="Set Range (°C)").grid(column=1, row=5, sticky="w")
         self.setTempRange_entry.config(state='disabled')
 
 
@@ -188,21 +188,21 @@ class outputView(tk.Frame):
 
         self.voltagein = tk.StringVar()
         self.voltagein.set(gb.testData.vin)
-        self.voltagein_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.voltagein)
+        self.voltagein_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.voltagein, font=("TkDefaultFont", 10, "bold"), justify='center')
         self.voltagein_entry.grid(column=0, row=1, padx=(0, 5), pady=5)
         ttk.Label(readingfrm, text="Vin (V)").grid(column=0, row=0)
 
         self.peakcurrent = tk.StringVar()
         self.peakcurrent.set(gb.testData.ipk)
-        self.peakcurrent_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.peakcurrent)
+        self.peakcurrent_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.peakcurrent, font=("TkDefaultFont", 10, "bold"), justify='center')
         self.peakcurrent_entry.grid(column=1, row=1, padx=(0, 5), pady=5, sticky="we")
         ttk.Label(readingfrm, text="Ipeak (A)").grid(column=1, row=0)
 
         self.pulsewidth = tk.StringVar()
         self.pulsewidth.set(gb.testData.pulseWidth)
-        self.pulsewidth_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.pulsewidth)
+        self.pulsewidth_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.pulsewidth, font=("TkDefaultFont", 10, "bold"), justify='center')
         self.pulsewidth_entry.grid(column=2, row=1, padx=(0, 5), pady=5, sticky="we")
-        ttk.Label(readingfrm, text="PulseWidth (us)").grid(column=2, row=0)
+        ttk.Label(readingfrm, text="PulseWidth (μs)").grid(column=2, row=0)
 
         #self.voltageoutlp = tk.StringVar()
         #self.voltageoutlp.set(gb.testData.voutlp)
@@ -212,28 +212,28 @@ class outputView(tk.Frame):
 
         self.testtime = tk.StringVar()
         self.testtime.set(gb.testData.testTime)
-        self.testtime_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.testtime)
+        self.testtime_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.testtime, font=("TkDefaultFont", 10, "bold"), justify='center')
         self.testtime_entry.grid(column=1, row=3, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(readingfrm, text="Test Time (s))").grid(column=1, row=2)
+        ttk.Label(readingfrm, text="Test Time (s)").grid(column=1, row=2)
 
         gb.testData.finalTemp = gb.thermo.get_measurement(1)
         print(f'temp: {gb.testData.finalTemp}')
 
         self.finaltemp = tk.StringVar()
         self.finaltemp.set(gb.testData.finalTemp)
-        self.finaltemp_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.finaltemp)
+        self.finaltemp_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.finaltemp, font=("TkDefaultFont", 10, "bold"), justify='center')
         self.finaltemp_entry.grid(column=2, row=3, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(readingfrm, text="Final Temp (C))").grid(column=2, row=2)
+        ttk.Label(readingfrm, text="Final Temp (°C)").grid(column=2, row=2)
 
         self.lpulse = tk.StringVar()
-        self.lpulse.set(gb.testData.lpulseSpecific)
-        self.lpulse_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.lpulse)
+        self.lpulse.set(gb.testData.lpulse)
+        self.lpulse_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.lpulse, font=("TkDefaultFont", 10, "bold"), justify='center')
         self.lpulse_entry.grid(column=0, row=5, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(readingfrm, text="Lpulse (uH)").grid(column=0, row=4)
+        ttk.Label(readingfrm, text="Lpulse (μH)").grid(column=0, row=4)
 
         self.voltageout = tk.StringVar()
         self.voltageout.set(gb.testData.vout)
-        self.voltageout_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.voltageout)
+        self.voltageout_entry = ttk.Entry(readingfrm, takefocus=0, width=10, textvariable=self.voltageout, font=("TkDefaultFont", 10, "bold"), justify='center')
         self.voltageout_entry.grid(column=1, row=5, padx=(0, 10), pady=5, sticky="we")
         ttk.Label(readingfrm, text="Vout (V)").grid(column=1, row=4)
 
@@ -259,7 +259,6 @@ class outputView(tk.Frame):
         # close button
         self.closeButton = ttk.Button(self, text="Close", command=self.close_window)
         self.closeButton.grid(column=5, row=7, padx=10, pady=5, sticky=tk.E)
-
 
 
         self.barno_entry.focus()
@@ -295,8 +294,8 @@ class outputView(tk.Frame):
     def check_temp(self):
         gb.testData.finalTemp = gb.thermo.get_measurement(1)
         self.update_label('finaltemp', f"{gb.testData.finalTemp:.1f}", "grey85")
-        pass
-
+        # check how fast the readings are
+        #self.measure_average_time()
 
     def process_update(self, update):
         if update['type'] == 'label':
@@ -372,6 +371,25 @@ class outputView(tk.Frame):
         # subroutines here first
     def do_something(self):
         print("Menu item clicked!")
+        # time the thermometer
+        start_time = ""
+
+    def measure_average_time(self):
+        readings = []
+        times = []
+
+        for i in range(10):
+            start_time = time.perf_counter()
+            reading = gb.thermo.get_measurement(1)
+            elapsed = time.perf_counter() - start_time
+
+            readings.append(reading)
+            times.append(elapsed)
+
+            print(f"Reading {i + 1}: {reading}, Time: {elapsed:.4f} seconds")
+
+        avg_time = sum(times) / len(times)
+        print(f"\nAverage time per measurement: {avg_time:.4f} seconds")
 
     def settings_window(self):
         newView = SetupView(self)
@@ -457,7 +475,7 @@ class outputView(tk.Frame):
 
         # test for endFlag
         if self.endFlag:
-            messagebox.showwarning(title='Output Testing', message='All the parts in the bar have been tested. Start a new bar.')
+            messagebox.showwarning(title='Pulse Inductance Testing', message='All the parts in the bar have been tested. Start a new bar.')
             return
 
         # check if part number entered is different from indexed
@@ -468,9 +486,8 @@ class outputView(tk.Frame):
             # minus 1 because it will be incremented later
             self.next_part_idx = bisect.bisect_right(self.partList, self.serialNum.get()) - 1
 
-        # create new csv file
+        # make serial number
         gb.testInfo.serialNumber = self.make_serial_number()
-        gb.testInfo.fileName = f"{gb.testInfo.barNum}{gb.testInfo.designNum}x{gb.testInfo.position}.csv"
 
         self.testButton.config(state='disabled')
         self.serialLabel.config(text="Testing Serial No.")
@@ -532,7 +549,15 @@ class outputView(tk.Frame):
         """
 
         #4 regardless pass or fail save data and status
-        dbase.record_output_data()
+        # standard or STx25
+        if self.option_map[self.test_option.get()] == 1 or  self.option_map[self.test_option.get()] == 2:
+            dbase.record_test_data_25(gb.testInfo.serialNumber)
+        # STX85
+        elif  self.option_map[self.test_option.get()] == 3:
+            dbase.record_test_data_85(gb.testInfo.serialNumber)
+
+
+        #dbase.record_output_data()
         # dbase.recordStatus(dbase, self.statusFlag, self.makeSerialNumber())
 
         #5 issue pass/fail signal
@@ -569,7 +594,7 @@ class outputView(tk.Frame):
             gb.testInfo.position = self.partList[self.next_part_idx]
             self.testButton.config(state='enabled')
         #else:
-        #    self.statusLabel.config(text="Ready", background="gray85")
+            self.statusLabel.config(text="Ready", background="gray85")
 
 
 
@@ -680,6 +705,7 @@ class outputView(tk.Frame):
             if not attr.startswith("__"):  # Filter out special methods
                 value = getattr(gb.testInfo, attr)
                 print(f"{attr}: {value}")
+
 
 
 class SetupView(tk.Toplevel):

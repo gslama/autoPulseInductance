@@ -87,77 +87,59 @@ def setup_scope(scope):
     generic initial setup
     some assumptions:
     channel 1 is used for triggering from the signal generator
-    channel 2 is for vdss with 10:1 probe
-    channel 3 is for current probe or direct into 1 Mohm
-        the two current probes have different setups
-        - when direct across sense resistor needs 50 ohm input
-    channel 4 is used for vout with 10:1 probe
+    channel 2 is for pulse width with 10:1 probe
+    channel 3 is for current sense resistor with 50 ohm input
+    channel 4 is not used
     :return:
     """
 
+    chan1 = 1
+    chan2 = 2
+    chan3 = gb.testInfo.currentChan
+    chan4 = 4
+
     scope.reset()
 
-    # channel 1 used for triggering
-    scope.set_chan_state(1,"ON")
-    scope.set_chan_probe(1, 1E0)    # was 1E1
-    scope.set_chan_scale(1, 5E0)    # was 1E1
-    scope.set_chan_position(1, 2)
+    # channel 1 used for triggering from signal generator
+
+    scope.set_chan_state(chan1,"ON")
+    scope.set_chan_probe(chan1, 1E0)    # was 1E1
+    scope.set_chan_scale(chan1, 5E0)    # was 1E1
+    scope.set_chan_position(chan1, 2)
     scope.set_chan_bandwidth(1, "B20")
 
     # channel 2 used for gate pulse with 10:1 probe
-    scope.set_chan_state(2,"ON")
-    scope.set_chan_probe(2, 1E1)
-    scope.set_chan_scale(2, 2E0)
-    scope.set_chan_position(2, -3)
-    scope.set_chan_bandwidth(2, "B20")
+    scope.set_chan_state(chan2,"ON")
+    scope.set_chan_probe(chan2, 1E1)
+    scope.set_chan_scale(chan2, 2E0)
+    scope.set_chan_position(chan2, -3)
+    scope.set_chan_bandwidth(chan2, "B20")
 
-    # channel 3 used for current
-    # default for resistor based or other
-    scope.set_chan_state(3,"ON")
-    scope.set_chan_unit(3, 'A')
-    #scope.set_chan_probe(3, 1E1)
-    scope.set_chan_scale(3, 200E-3)
-    scope.set_chan_position(3, -3)
-    scope.set_chan_impedance(3, "FIFTY")
-    scope.set_chan_coupling(3,"DC")
-    scope.set_chan_bandwidth(3, "B20")
+    # channel 3 used for current sense resistor
+    scope.set_chan_state(chan3,"ON")
+    scope.set_chan_unit(chan3, 'A')
+    #scope.set_chan_probe(chan3, 1E1)
+    scope.set_chan_scale(chan3, gb.testInfo.currentScale)
+    scope.set_chan_position(chan3, -3)
+    scope.set_chan_impedance(chan3, "FIFTY")
+    scope.set_chan_coupling(chan3,"DC")
+    scope.set_chan_bandwidth(chan3, "B20")
 
-    # determine current probe type
-    if gb.testInfo.currentProbe == "P6021":
-        scope.set_chan_probe(3, 1E1)
-        scope.set_chan_scale(3, 1E0)
-        scope.set_chan_position(3, -3)
-        scope.set_chan_coupling(3, "AC")
-        scope.set_chan_impedance(3, "0MEG")
-    elif gb.testInfo.currentProbe == "TCP202":
-        scope.set_chan_scale(3, 1E0)
-
-    # channel 4 used for scaled output voltage with 10:1 probe
-    scope.set_chan_state(4,"ON")
-    scope.set_chan_probe(4, 1E1)
-    scope.set_chan_scale(4, 5E-1)
-    scope.set_chan_position(4, -4)
-    scope.set_chan_coupling(4, "DC")
-    scope.set_chan_bandwidth(4, "B20")
-    scope.set_chan_impedance(4, "0MEG")
+    # channel 4 not used
+    scope.set_chan_state(chan4,"OFF")
 
     # measurements
     scope.set_meas_system("ON")
 
-    # peak current
+    # peak current, measurement #1
     scope.set_meas_type(1, "MAX")
-    scope.set_meas_source(1, 3)
+    scope.set_meas_source(1, chan3)
     scope.set_meas_state(1, "ON")
 
-    # pulse width
+    # pulse width, measurement #2
     scope.set_meas_type(2, "WID")
-    scope.set_meas_source(2, 2)
+    scope.set_meas_source(2, chan2)
     scope.set_meas_state(2, "ON")
-
-    # output voltage
-    scope.set_meas_type(3, "RMS")
-    scope.set_meas_source(3, 4)
-    scope.set_meas_state(3, "ON")
 
     # timebase
     scope.set_timebase_scale(1E-6)
@@ -170,7 +152,7 @@ def setup_scope(scope):
 
     # triggering
     scope.set_trigger_mode("SING")
-    scope.set_trigger_source(1)
+    scope.set_trigger_source(chan1)
     scope.set_trigger_level(3.0)  # was 4
     scope.set_trigger_coupling("DC")
     scope.set_trigger_edge("FALL")
@@ -555,9 +537,21 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
 
         # set scope to one shot
         result = gb.scope.get_trigger_mode()
-        #print (result)
+        print (f'trigger mode: {result}')
+        result = gb.scope.get_trigger_status()
+        print (f'trigger status: {result}')
+
+        # check trigger status
+        if 'Stop' in gb.scope.get_trigger_status():
+            gb.scope.set_trigger_mode('SINGLE')
+
+        #gb.scope.set_trigger_mode('SINGLE')
         if 'SING' not in gb.scope.get_trigger_mode():
-            gb.scope.set_trigger_mode('SING')
+            gb.scope.set_trigger_mode('SINGLE')
+            print("set single")
+
+        # debug delay
+        time.sleep(2)
 
         # pulse width sent in seconds to meter
         gb.sig_gen.set_pulse_width(round(pulse_width * pulse_units, 9))
@@ -577,10 +571,11 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
             abort_flag = True
             break
         else:
+            # get pulse width from scope
             meas_pulse_width = float(gb.scope.get_meas_value(2))
-            # get current
+            # get current from scope
             meas_ipk = float(gb.scope.get_meas_value(1))
-            # get output voltage
+            # get output voltage from meter
             meas_vout = float(gb.meter.get_meas_voltage('DC', 6))
 
         # turn off generator
@@ -634,16 +629,17 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
 
     # check for errors
     # minimum pulse width - value based on empirical testing
-    if meas_pulse_width < 1.5E-6:
-        messagebox.showerror(title="Test Error", message="Pulse width too short. Check connections or part")
-        abort_flag = True
-        #return
+    if meas_pulse_width:
+        if meas_pulse_width < 1.5E-6:
+            messagebox.showerror(title="Test Error", message="Pulse width too short. Check connections or part")
+            abort_flag = True
+            #return
 
-    # no primary pulse current - arbitrarily set to 400 mA
-    elif meas_ipk < 0.40:
-        messagebox.showerror(title="Test Error", message="Primary Open. Check connections or part")
-        abort_flag = True
-        #return
+        # no primary pulse current - arbitrarily set to 400 mA
+        elif meas_ipk < 0.40:
+            messagebox.showerror(title="Test Error", message="Primary Open. Check connections or part")
+            abort_flag = True
+            #return
 
     # pulse current within expected range - +/- 10% of target
     # current probe description as current value - need to extract it

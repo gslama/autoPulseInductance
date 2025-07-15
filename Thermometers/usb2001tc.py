@@ -46,7 +46,7 @@ class USB2001TC(Thermometer):
         try:
             # Get temperature from the specified channel
             temp_c =  ul.t_in(boardNum, channel, TempScale.CELSIUS)
-            print(f"Temperature on channel {channel}: {temp_c:.2f} °C")
+            #print(f"Temperature on channel {channel}: {temp_c:.2f} °C")
         except Exception as e:
             print(f"Error reading temperature: {e}")
 

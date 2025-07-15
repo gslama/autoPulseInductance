@@ -107,7 +107,7 @@ class CLtestInfo(object):
         self.vdssChan = "2"
         self.vdssScale = "100"
         self.currentChan = "3"
-        self.currentScale = "0.50"
+        self.currentScale = "0.2"
         self.voutChan = "4"
         self.voutScale = "0.5"
         self.currentRatio = 597

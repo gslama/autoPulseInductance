@@ -205,7 +205,40 @@ class DataBase:
         return row[0]
 
 
-    def record_test_data(serialNum):
+    def record_test_data_25(self, serialNum):
+        """
+        record measured test data
+        :param data:
+        :param parameters:
+        :return:
+        """
+        # server = 'LENOVO-M92\SQLEXPRESS'
+        # database = 'BarDataSQL'
+        # username = 'AutoTest'
+        # password = 'southdakota'
+
+        server = gb.initValues['sqlServer']
+        database = gb.initValues['barDataBase']
+        username = gb.initValues['serverUserName']
+        password = gb.initValues['serverPassword']
+
+        conn = pyodbc.connect(
+            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
+            ';PWD=' + password + ';ENCRYPT=no;')
+        cursor = conn.cursor()
+        conn.autocommit = True
+
+        print(gb.testData.vout, gb.testData.lpulse, serialNum)
+
+        # update database
+        cursor.execute(
+            "UPDATE Electrical SET Vout25 = ?, LPulse25 = ? WHERE PrimeKey = ?",
+            (gb.testData.vout, gb.testData.lpulse, serialNum))
+
+        conn.close()
+        return
+
+    def record_test_data_85(self, serialNum):
         """
         record measured test data
         :param data:
@@ -230,9 +263,8 @@ class DataBase:
 
         # update database
         cursor.execute(
-            "UPDATE Electrical SET LPri = ?, LSec = ?, Leakage = ?, Qpri = ?, RPri = ?, RSec = ? WHERE PrimeKey = ?",
-            gb.testData.priInd, gb.testData.secInd, gb.testData.priLkg, gb.testData.priQ, gb.testData.priRes, gb.testData.secRes,
-            serialNum)
+            "UPDATE Electrical SET Vout85 = ?, LPulse85 = ? WHERE PrimeKey = ?",
+            (gb.testData.vout, gb.testData.lpulse, serialNum))
 
         conn.close()
         return
