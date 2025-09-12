@@ -39,7 +39,7 @@ def init_test():
 
     setup_signal_generator(gb.sig_gen)
     #setup_scanner()
-    setup_meter()
+    #setup_meter()
     setup_power_supply()
     setup_scope(gb.scope)
 
@@ -93,6 +93,7 @@ def setup_scope(scope):
     :return:
     """
 
+    # defie channels
     chan1 = 1
     chan2 = 2
     chan3 = gb.testInfo.currentChan
@@ -126,7 +127,16 @@ def setup_scope(scope):
     scope.set_chan_bandwidth(chan3, "B20")
 
     # channel 4 not used
-    scope.set_chan_state(chan4,"OFF")
+    #scope.set_chan_state(chan4,"OFF")
+
+    # channel 4 used for scaled output voltage with 10:1 probe
+    scope.set_chan_state(chan4,"ON")
+    scope.set_chan_probe(chan4, 1E1)
+    scope.set_chan_scale(chan4, 5E-1)
+    scope.set_chan_position(chan4, -4)
+    scope.set_chan_coupling(chan4, "DC")
+    scope.set_chan_bandwidth(chan4, "B20")
+    scope.set_chan_impedance(chan4, "0MEG")
 
     # measurements
     scope.set_meas_system("ON")
@@ -140,6 +150,11 @@ def setup_scope(scope):
     scope.set_meas_type(2, "WID")
     scope.set_meas_source(2, chan2)
     scope.set_meas_state(2, "ON")
+
+    # measure output divider, measurement #3
+    scope.set_meas_type(3, "RMS")
+    scope.set_meas_source(3, chan4)
+    scope.set_meas_state(3, "ON")
 
     # timebase
     scope.set_timebase_scale(1E-6)
@@ -552,7 +567,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
             print("set single")
 
         # debug delay
-        time.sleep(2)
+        time.sleep(1)
 
         # pulse width sent in seconds to meter
         gb.sig_gen.set_pulse_width(round(pulse_width * pulse_units, 9))
@@ -561,7 +576,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         # turn on generator
         gb.sig_gen.set_output_state('ON')
 
-        # wait 200 ms
+        # wait 200 ms to charge capacitor
         time.sleep(0.2)
 
         # get pulse width
@@ -570,14 +585,24 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
             # error
             gb.sig_gen.set_output_state('OFF')
             abort_flag = True
+            print('Failed to get pulse width')
             break
         else:
             # get pulse width from scope
-            meas_pulse_width = float(gb.scope.get_meas_value(2))
+            #meas_pulse_width = float(gb.scope.get_meas_value(2))
+            # under some conditions this returned empty
+            meas_pulse_width = read_measurement_float(gb.scope.get_meas_value, 2, retries=10, delay=0.05)
             # get current from scope
-            meas_ipk = float(gb.scope.get_meas_value(1))
-            # get output voltage from meter
-            meas_vout = float(gb.meter.get_meas_voltage('DC', 6))
+            #meas_ipk = float(gb.scope.get_meas_value(1))
+            meas_ipk = read_measurement_float(gb.scope.get_meas_value, 1, retries=10, delay=0.05)
+
+            # reset trigger because at first trigger not enough cycles have passed to charge the capacitor
+            gb.scope.set_trigger_mode('SINGLE')
+            # get output voltage from scope
+            # had to add retries because was returning empty the first few calls
+            #meas_vout = float(gb.scope.get_meas_value(3))
+            meas_vout = read_measurement_float(gb.scope.get_meas_value, 3, retries=10, delay=0.05)
+            print(f'Vout: {meas_vout * float(gb.testInfo.voltageRatio)}')
 
         # turn off generator
         gb.sig_gen.set_output_state('OFF')
@@ -830,6 +855,48 @@ def get_vdss(instr):
     #    vdss = instr.query("MEASU:MEAS2:VAL?")
 
     return float(vdss)
+
+
+import time, math, re
+
+_NUM_RE = re.compile(r'[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?')
+
+def _parse_float(raw):
+    if raw is None:
+        return None
+    if isinstance(raw, (bytes, bytearray)):
+        raw = raw.decode(errors='ignore')
+    s = str(raw).strip()
+    if not s or '*' in s or s.lower() in {'nan', 'inf', '+inf', '-inf'}:
+        return None
+    m = _NUM_RE.search(s)  # handles values like "1.234 V"
+    if not m:
+        return None
+    try:
+        val = float(m.group(0))
+        return val if math.isfinite(val) else None
+    except ValueError:
+        return None
+
+def read_measurement_float(getter, *getter_args, retries=20, delay=0.05, backoff=1.5):
+    """
+    Calls `getter(*getter_args)` until a finite float is returned or retries are exhausted.
+    Raises RuntimeError on failure.
+    """
+    last = None
+    for _ in range(retries):
+        last = getter(*getter_args)
+        val = _parse_float(last)
+        if val is not None:
+            return val
+        time.sleep(delay)
+        delay *= backoff  # gentle backoff
+        #print(f'Retries for get scope measurements: {_}')
+    raise RuntimeError(f"Failed to get numeric measurement after {retries} tries (last={last!r}).")
+
+
+
+
 
 
 ###########################################################

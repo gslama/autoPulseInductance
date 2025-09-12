@@ -20,7 +20,7 @@ import globals as gb
 from Oscilloscopes.scope_base import Scope
 from SignalGenerators.signal_gen_base import SignalGenerator
 from PowerSupplies.power_supply_base import PowerSupply
-from Multimeters.meter_base import Meter
+#from Multimeters.meter_base import Meter
 from Thermometers.thermometer_base import Thermometer
 
 """
@@ -80,7 +80,7 @@ except Exception as e:
 # load instruments
 gb.scope = Scope.factory(gb.initValues['scopeMeter'], gb.initValues['scopeAdr'])
 gb.sig_gen = SignalGenerator.factory(gb.initValues['sigGen'], gb.initValues['sigGenAdr'])
-gb.meter = Meter.factory(gb.initValues['meterUnit'], gb.initValues['meterAdr'])
+#gb.meter = Meter.factory(gb.initValues['meterUnit'], gb.initValues['meterAdr'])
 gb.power = PowerSupply.factory(gb.initValues['powerUnit'], gb.initValues['powerAdr'])
 #gb.scanner = Meter.factory(gb.initValues['scannerUnit'], gb.initValues['scannerAdr'])
 gb.thermo = Thermometer.factory(gb.initValues['thermoUnit'], gb.initValues['thermoAdr'])
