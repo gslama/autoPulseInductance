@@ -556,11 +556,7 @@ class outputView(tk.Frame):
         elif  self.option_map[self.test_option.get()] == 3:
             dbase.record_test_data_85(gb.testInfo.serialNumber)
 
-
-        #dbase.record_output_data()
-        # dbase.recordStatus(dbase, self.statusFlag, self.makeSerialNumber())
-
-        #5 issue pass/fail signal
+        #5 issue pass/fail signal - not needed here
         #if self.status_flag:
         #    self.statusLabel.config(text=("MV-Fail"), background="red")
         #else:
