@@ -529,18 +529,19 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         # get input voltage
         # TODO vin = get_input_voltage(instr_scan)
         vin = gb.power.get_voltage(1)
-        print(f'vin: {vin}')
+        #print(f'vin: {vin}')
         gb.testData.vin = vin
         # display
         label_update = {'type': 'label', 'label_name': 'voltagein', 'value': f"{gb.testData.vin:.2f}", 'color': "grey85"}
         update_queue.put(label_update)
 
-        # set scope to one shot
-        result = gb.scope.get_trigger_mode()
-        print (f'trigger mode: {result}')
-        result = gb.scope.get_trigger_status()
-        print (f'trigger status: {result}')
+        # debug scope status
+        #result = gb.scope.get_trigger_mode()
+        #print (f'trigger mode: {result}')
+        #result = gb.scope.get_trigger_status()
+        #print (f'trigger status: {result}')
 
+        # set scope to one shot
         # check trigger status
         if 'Stop' in gb.scope.get_trigger_status():
             gb.scope.set_trigger_mode('SINGLE')
@@ -586,12 +587,12 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         # display
         label_update = {'type': 'label', 'label_name': 'testtime', 'value': f"{gb.testData.testTime:.2f}", 'color': "grey85"}
         update_queue.put(label_update)
-        print(f"test time: {gb.testData.testTime}")
+        #print(f"test time: {gb.testData.testTime}")
 
         # get temperature
         #gb.testData.finalTemp = gb.scanner.get_meas_temp(gb.testInfo.tempChan, 'T')
         gb.testData.finalTemp = gb.thermo.get_measurement(1)
-        print(f'max_temp: {gb.testData.finalTemp}')
+        #print(f'max_temp: {gb.testData.finalTemp}')
         # display
         label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{gb.testData.finalTemp:.1f}", 'color': "grey85"}
         update_queue.put(label_update)

@@ -528,7 +528,7 @@ class outputView(tk.Frame):
 
     def after_test(self):
 
-        print("after_test")
+        #print("after_test")
 
         # todo this is ready to use - not sure  - copied from hipot
         # before saving check test history
@@ -860,6 +860,13 @@ class SetupView(tk.Toplevel):
 
         ttk.Radiobutton(voltagefrm, text='Other', variable=self.voltage_option, value='Other',
                         command=self.voltage_other).grid(column=0, row=3, padx=20, sticky=tk.W)
+
+        self.voltage_option_map = {
+            '1200 V (178 k)': '1200V',
+            '1400 V (150 k)': '1400V',
+            '2000 V (249 k)': '2000V',
+            'Other': 'Other'
+        }
 
         self.voltage_ratio = tk.StringVar()
         self.voltage_ratio.set(gb.testInfo.voltageRatio)

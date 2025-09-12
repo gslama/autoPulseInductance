@@ -228,8 +228,6 @@ class DataBase:
         cursor = conn.cursor()
         conn.autocommit = True
 
-        print(gb.testData.vout, gb.testData.lpulse, serialNum)
-
         # update database
         cursor.execute(
             "UPDATE Electrical SET Vout25 = ?, LPulse25 = ? WHERE PrimeKey = ?",
