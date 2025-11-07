@@ -46,7 +46,7 @@ if '--show-console' not in sys.argv:
 # define window
 root = tk.Tk()
 root.title("AutoPulseInductance")
-root.iconbitmap(resource_path('oscilloscope.ico'))
+#root.iconbitmap(resource_path('oscilloscope.ico'))
 root.geometry("800x400+200+200")
 root.resizable(width=False, height=False)
 
@@ -58,6 +58,7 @@ text_color ='#f8f8f8'
 frame_color = '#dcdcdc'
 #root.config(bg=root_color)
 
+"""
 # get init values from init file
 try:
     with open("testerInit.txt", "r") as file:
@@ -76,14 +77,15 @@ except IOError:
 except Exception as e:
     print("An error occurred:", str(e))
     messagebox.showerror(title="File Open", message="testerInit.txt - File error on open", detail=str(e))
+"""
 
 # load instruments
-gb.scope = Scope.factory(gb.initValues['scopeMeter'], gb.initValues['scopeAdr'])
-gb.sig_gen = SignalGenerator.factory(gb.initValues['sigGen'], gb.initValues['sigGenAdr'])
-#gb.meter = Meter.factory(gb.initValues['meterUnit'], gb.initValues['meterAdr'])
-gb.power = PowerSupply.factory(gb.initValues['powerUnit'], gb.initValues['powerAdr'])
-#gb.scanner = Meter.factory(gb.initValues['scannerUnit'], gb.initValues['scannerAdr'])
-gb.thermo = Thermometer.factory(gb.initValues['thermoUnit'], gb.initValues['thermoAdr'])
+gb.scope = Scope.factory(gb.initValues.scopeMeter, gb.initValues.scopeAdr)
+gb.sig_gen = SignalGenerator.factory(gb.initValues.sigGen, gb.initValues.sigGenAdr)
+# gb.meter = Meter.factory(gb.initValues.meterUnit, gb.initValues.meterAdr)
+gb.power = PowerSupply.factory(gb.initValues.powerUnit, gb.initValues.powerAdr)
+#gb.scanner = Meter.factory(gb.initValues.scannerUnit, gb.initValues.scannerAdr)
+gb.thermo = Thermometer.factory(gb.initValues.thermoUnit, gb.initValues.thermoAdr)
 
 # create an instance of input view
 mainview = MainView.outputView(root)

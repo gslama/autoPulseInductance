@@ -28,18 +28,15 @@ class DataBase:
         :param partNum:
         :return:
         """
-        # server = 'LENOVO-M92\SQLEXPRESS'
-        # database = 'PartLimitsSQL'
-        # username = 'AutoTest'
-        # password = 'southdakota'
-
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['partLimitsDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + '; DATABASE=' + database + '; UID=' + username + '; PWD=' + password + '; ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
 
         # find partno in database
@@ -56,9 +53,7 @@ class DataBase:
             designNum = row[0]
 
         conn.close()
-
         return designNum
-
 
 
     def check_record_exists(self, bar_num):
@@ -66,14 +61,15 @@ class DataBase:
         check if record exists
         :return: true if exists
         """
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
 
         # find partno in database
@@ -89,22 +85,23 @@ class DataBase:
             status: bool = True
 
         conn.close()
-
         return status
+
 
     def get_part_number(self, bar_num):
         """
         check if record exists and gets catalog_num
         :return: true if exists
         """
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
 
         # find partno in database
@@ -122,8 +119,8 @@ class DataBase:
             status: bool = True
 
         conn.close()
-
         return status
+
 
     def record_defect(self, defectCode, serialNum):
         """
@@ -132,19 +129,15 @@ class DataBase:
         :param serialNum:
         :return:
         """
-        # server = 'LENOVO-M92\SQLEXPRESS'
-        # database = 'BarDataSQL'
-        # username = 'AutoTest'
-        # password = 'southdakota'
-
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
         conn.autocommit = True
 
@@ -154,6 +147,7 @@ class DataBase:
         conn.close()
         return
 
+
     def record_status(self, statusCode, serialNum):
         """
         record status code
@@ -162,14 +156,14 @@ class DataBase:
         :return:
         """
 
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
-
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
         conn.autocommit = True
 
@@ -179,6 +173,7 @@ class DataBase:
         conn.close()
         return
 
+
     def get_record_stats(self, serialNum):
         '''
         retirns part status
@@ -186,14 +181,14 @@ class DataBase:
         :return:
         '''
 
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
-
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
 
         # update database
@@ -212,19 +207,15 @@ class DataBase:
         :param parameters:
         :return:
         """
-        # server = 'LENOVO-M92\SQLEXPRESS'
-        # database = 'BarDataSQL'
-        # username = 'AutoTest'
-        # password = 'southdakota'
-
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
         conn.autocommit = True
 
@@ -236,6 +227,7 @@ class DataBase:
         conn.close()
         return
 
+
     def record_test_data_85(self, serialNum):
         """
         record measured test data
@@ -243,19 +235,15 @@ class DataBase:
         :param parameters:
         :return:
         """
-        # server = 'LENOVO-M92\SQLEXPRESS'
-        # database = 'BarDataSQL'
-        # username = 'AutoTest'
-        # password = 'southdakota'
-
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
         conn.autocommit = True
 
@@ -275,14 +263,15 @@ class DataBase:
         :param barNum:
         :return: partNum list
         """
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
 
         # find partnums in database with good status and return in order
@@ -295,22 +284,23 @@ class DataBase:
             list.append(value)
 
         conn.close()
-
         return list
+
 
     def record_hipot_data(statusCode,serialNum):
         """
         record IR-Hipot test results
         :return:
         """
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
         conn.autocommit = True
 
@@ -323,6 +313,7 @@ class DataBase:
         conn.close()
         return
 
+
     def load_test_limits(self, query):
         """
         get test limits
@@ -330,19 +321,15 @@ class DataBase:
         :param query: is the part number
         :return:
         """
-        # server = 'LENOVO-M92\SQLEXPRESS'
-        # database = 'PartLimitsSQL'
-        # username = 'AutoTest'
-        # password = 'southdakota'
-
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
 
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
 
         # find partno in database
@@ -437,14 +424,14 @@ class DataBase:
         :return:
         '''
 
-        server = gb.initValues['sqlServer']
-        database = gb.initValues['barDataBase']
-        username = gb.initValues['serverUserName']
-        password = gb.initValues['serverPassword']
-
         conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 18 for SQL Server}; SERVER=' + server + ';DATABASE=' + database + ';UID=' + username +
-            ';PWD=' + password + ';ENCRYPT=no;')
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
         cursor = conn.cursor()
         conn.autocommit = True
 
@@ -476,6 +463,7 @@ def create_output_file_header():
         file.write(f"{file_name}\n")
         file.write(f"{gb.testInfo.serialNumber}\n")
         file.write(f"Time, PulseWidth({gb.testInfo.pulseUnits}), Vo(Vdc), Ipk(A), FinalTemp(C), Vdss(V), TempDiff(C), Vin(Vdc), PulseInd(uH)\n")
+
 
 def append_data_output_file():
     '''

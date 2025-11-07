@@ -4,12 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9cec9493-59ae-42fd-8ba3-96c44ce46bf0" name="Changes" comment="-saves data&#10;-most everything works now">
+    <list default="true" id="9cec9493-59ae-42fd-8ba3-96c44ce46bf0" name="Changes" comment="-9/12/25&#10;-commit first release">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainView.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainView.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestRoutines.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestRoutines.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/autoPulse.py" beforeDir="false" afterPath="$PROJECT_DIR$/autoPulse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autoPulse.spec" beforeDir="false" afterPath="$PROJECT_DIR$/autoPulse.spec" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,10 +21,13 @@
       </list>
     </option>
   </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="scope_ch4" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="scope_ch4" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -37,12 +38,12 @@
     &quot;assignee&quot;: &quot;gslama&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/gslama/autoOutput.git&quot;,
-    &quot;accountId&quot;: &quot;b42471fa-2836-4974-8b8a-02d78ee5d4d5&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/gslama/autoPulseInductance",
+    "accountId": "b42471fa-2836-4974-8b8a-02d78ee5d4d5"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
 }</component>
@@ -268,7 +269,31 @@
       <option name="project" value="LOCAL" />
       <updated>1752545455411</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="-works with meter being used to read high voltage&#10;-test time is 3.5 s">
+      <option name="closed" value="true" />
+      <created>1757683329781</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1757683329781</updated>
+    </task>
+    <task id="LOCAL-00023" summary="-9/12/25&#10;-converted measuring vout from meter to scope chan 4&#10;-had to add second trigger&#10;-had to add retries because call was returning empty&#10;-output voltage is higher as expected (more real) &#10;-test time faster at 2s">
+      <option name="closed" value="true" />
+      <created>1757690184934</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1757690184934</updated>
+    </task>
+    <task id="LOCAL-00024" summary="-9/12/25&#10;-commit first release">
+      <option name="closed" value="true" />
+      <created>1757691625792</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1757691625792</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -312,7 +337,10 @@
     <MESSAGE value="- lots of debug fixes&#10;- adapted scanner and meter to do temperature only&#10;- scope chan 4 does output voltage&#10;- adjusted setup page&#10;- corrected ending program&#10;- this does compile into an exe" />
     <MESSAGE value="- first draft with working test_pulse&#10;- modified interface&#10;- no data recording" />
     <MESSAGE value="-saves data&#10;-most everything works now" />
-    <option name="LAST_COMMIT_MESSAGE" value="-saves data&#10;-most everything works now" />
+    <MESSAGE value="-works with meter being used to read high voltage&#10;-test time is 3.5 s" />
+    <MESSAGE value="-9/12/25&#10;-converted measuring vout from meter to scope chan 4&#10;-had to add second trigger&#10;-had to add retries because call was returning empty&#10;-output voltage is higher as expected (more real) &#10;-test time faster at 2s" />
+    <MESSAGE value="-9/12/25&#10;-commit first release" />
+    <option name="LAST_COMMIT_MESSAGE" value="-9/12/25&#10;-commit first release" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

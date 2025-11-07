@@ -1,0 +1,44 @@
+# commonInit.txt
+# with comon tester information
+# local testerInit file will overwrite duplicate keys
+
+sqlServer = LENOVONEO24\SQLEXPRESS
+serverUserName = AutoTest2
+serverPassword = southdakota
+barDataBase = BarDataSQL
+barDataTable = Electrical
+barHistoryTable = TestHistory
+barLimitTable = Limits
+testDataPath = Test Data\Output_Test\
+inductorDataPath = Test Data\
+chartDataPath = 95_series\
+excelChartFileName = Test Data\Auto Output Chart.xlsm
+
+lcrMeter = PMA3260A
+lcrAdr = GPIB0::6::INSTR
+lcrXfmrLevel = 0.5
+lcrIndLevel = 0.1
+lcrFrequency = 100000
+lcrCalLevel = 0.5
+
+hipotMeter = GPT9803
+hipotAdr = ASRL4::INSTR
+
+scopeMeter = SDS824XHD
+scopeAdr = TCPIP0::192.168.88.13::inst0::INSTR
+
+sigGen = SDG2042X
+sigGenAdr = TCPIP0::192.168.88.14::inst0::INSTR
+
+powerUnit = SPD3033XE
+powerAdr = TCPIP0::192.168.88.10::inst0::INSTR
+
+scannerUnit = HP34970A
+scannerAdr = GPIB1::10::INSTR
+
+meterUnit = HP34401A
+meterAdr = GPIB1::03::INSTR
+
+thermoUnit = USB2001TC
+thermoAdr = 1
+boardNum = 0

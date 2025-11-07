@@ -7,8 +7,10 @@ Home for global variables
 import array as arr
 from enum import Enum
 from dataclasses import dataclass
+from tkinter import messagebox
+import os
 
-# declare variables for instrumemts
+# declare variables for instruments
 lcr = None
 hipot = None
 scope = None
@@ -17,17 +19,19 @@ power = None
 meter = None
 thermo = None
 
-
+@dataclass
 class CLsystem(object):
     '''
     system information
     '''
     # internal system variables, mostly status
-    def __init__(self):
-        self.version = "1.0.0"
-        self.debugMode = True
-        self.calibrated = False
-        self.fixture = ""
+    version: str = "1.0.0"
+    debugMode = True
+    calibrated = False
+    fixture: str = ""
+
+# declare instance
+system = CLsystem()
 
 @dataclass
 class CLinitValues(object):
@@ -36,45 +40,97 @@ class CLinitValues(object):
     "testerInit.txt"
     '''
 
-    def __init__(self):
-        self.sqlServer = ""
-        self.serverUserName = ""
-        self.serverPassword = ""
-        self.partLimitsDataBase = ""
-        self.barDatabase = ""
-        self.barDataTable = ""
-        self.barLimitTable = ""
-        self.basePath = ""
-        self.testDataPath = ""
-        self.inductorDataPath = ""
-        self.chartDataPath = ""
-        self.excelChartFileName = ""
-        self.lcrMeter = ""
-        self.lcrAdr = ""
-        self.hipotMeter = ""
-        self.hipotAdr = ""
-        self.scopeMeter = "SDS824X"
-        self.scopeAdr = ""
-        self.meterUnit = "SDM3055SC"
-        self.meterAdr = ""
-        self.sigGen = "SDG2042X"
-        self.sigGenAdr = ""
-        self.powerUnit = "GPP4323"
-        self.powerAdr = ""
-        self.scannerUnit = "HP34970A"
-        self.scannerAdr = ""
-        self.thermoUnit = "USB2001TC"
-        self.thermoAdr = "1"
-        self.boardNum = "0"
-        self.commPort = "4"
-        self.lcrXfmrLevel = "0.5"
-        self.lcrIndLevel = "0.1"
-        self.lcrFrequency = "100000"
-        self.lcrCalLevel = "0.5"
-        self.lcrBias = "0"
-        self.debugLcr = 1
-        self.ipeakLo = 0.9
-        self.ipeakHi = 1.1
+    commonInitFile: str = ""
+    sqlServer: str = ""
+    serverUserName: str = ""
+    serverPassword: str = ""
+    partLimitsDataBase: str = ""
+    barDataBase: str = ""
+    barDataTable: str = ""
+    barHistoryTable: str = ""
+    barLimitTable: str = ""
+    basePath: str = ""
+    testDataPath: str = ""
+    inductorDataPath: str = ""
+    chartDataPath: str = ""
+    excelChartFileName: str = ""
+    lcrMeter: str = ""
+    lcrAdr: str = ""
+    hipotMeter: str = ""
+    hipotAdr: str = ""
+    scopeMeter: str = "SDS824X"
+    scopeAdr: str = ""
+    sigGen: str = "SDG2042X"
+    sigGenAdr: str = ""
+    powerUnit: str = "GPP4323"
+    powerAdr: str = ""
+    scannerUnit: str = "HP34970A"
+    scannerAdr: str = ""
+    meterUnit: str = ""
+    meterAdr: str = ""
+    thermoUnit: str = "USB2001TC"
+    thermoAdr: int = 1
+    boardNum: int = 0
+    dioAdr: int = 0
+    commPort: int = 4
+    lcrXfmrLevel: float = 0.5
+    lcrIndLevel: float = 0.1
+    lcrFrequency: int = 100000
+    lcrCalLevel: float = 0.5
+    lcrBias: float = 0
+    debugLcr: int = 1
+    debugMode: int = 0
+    test: str = ""
+
+# function to load from files
+def load_init_values(filename):
+    """Load init values, with optional commonInit.txt defaults."""
+
+    def load_file(path):
+        data = {}
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    if '=' in line:
+                        key, value = line.split('=', 1)
+                        data[key.strip()] = value.strip().strip('"').strip("'")
+        except FileNotFoundError:
+            print("File not found.")
+            messagebox.showerror(title="File Open", message="The testerInit.txt file was not found")
+        except IOError:
+            print("Error reading the file.")
+            messagebox.showerror(title="File Open", message="testerInit.txt - Error reading file.")
+        except Exception as e:
+            print("An error occurred:", str(e))
+            messagebox.showerror(title="File Open", message="testerInit.txt - File error on open", detail=str(e))
+        return data
+
+    # Step 1: load the main/local file
+    local_data = load_file(filename)
+
+    # Step 2: if it defines a commonInitFile, load that first
+    common_file = local_data.get('commonInitFile', '')
+    merged_data = {}
+
+    if common_file:
+        # If relative, make it relative to the main file’s directory
+        if not os.path.isabs(common_file):
+            common_file = os.path.join(os.path.dirname(filename), common_file)
+        if os.path.exists(common_file):
+            merged_data = load_file(common_file)
+
+    # Step 3: update with local data, overwriting common values
+    merged_data.update(local_data)
+
+    return merged_data
+
+# --- auto-load the values when the module is imported ---
+init_dict = load_init_values('testerinit.txt')
+initValues = CLinitValues(**init_dict)
+
 
 @dataclass
 class CLtestInfo(object):
@@ -82,63 +138,60 @@ class CLtestInfo(object):
     information about test setup and parameters
     default values included
     '''
-    def __init__(self):
-        self.partNum = None
-        self.barNum = None
-        self.designNum = None
-        self.buildNum = None
-        self.furnaceNum = None
-        self.fireDate = None
-        self.fileName = ""
-        self.filePath = ""
-        self.filePathBase = ""
-        self.filePathOutput = ""
-        self.numPositions = None
-        self.position = None
-        self.serialNumber = None
-        self.testType = None
-        self.testCheck = None
-        self.testOption = None
-        self.fixture = None
-        self.tempType = "T"
-        self.tempChan = "105"
-        self.vinChan = "110"
-        self.voutChan = "107"
-        self.vdssChan = "2"
-        self.vdssScale = "100"
-        self.currentChan = "3"
-        self.currentScale = "0.2"
-        self.voutChan = "4"
-        self.voutScale = "0.5"
-        self.currentRatio = 597
-        self.currentProbe = "1.5 A (0.604R)"
-        self.voltageRatio = 562.8
-        self.pulsePeriod = 20
-        self.pulseWidth = None
-        self.pulseStart = 1
-        self.pulseStop = 7
-        self.pulseStep = 0.5
-        self.pulseUnits = "us"
-        self.thresholdCurrent = 2.5
-        self.thresholdVoltage = 2000
-        self.minTemp = 18
-        self.maxTemp = 30
-        self.testInterval = 3
-        self.testCurrent = 1.5
-        self.lpulseCurrent = 1.5
-        self.vin = 15
-        self.currentLimit = 2
-        self.vaux = 5.3
-        self.iaux = 1
-        self.setTemp = 85
-        self.setTempRange = 1
-        self.preheat = False
+    partNum: str = None
+    barNum: str = None
+    designNum: str = None
+    buildNum: str = None
+    furnaceNum: str = None
+    fireDate: str = None
+    fileName: str = ""
+    filePath: str = ""
+    filePathBase: str = ""
+    filePathOutput: str = ""
+    numPositions = None
+    position = None
+    serialNumber: str = None
+    testType: str = None
+    testCheck: str = None
+    testOption: str = None
+    fixture: str = None
+    tempType: str = "T"
+    tempChan: str = "105"
+    vinChan: str = "110"
+    voutChan: str = "107"
+    vdssChan: str = "2"
+    vdssScale: str = "100"
+    currentChan: str = "3"
+    currentScale: str = "0.50"
+    voutChan: str = "4"
+    voutScale = "0.5"
+    currentRatio = 597
+    currentProbe: str = "1.5 A (0.604R)"
+    voltageRatio = 562.8
+    pulsePeriod = 20
+    pulseWidth = None
+    pulseStart = 1
+    pulseStop = 7
+    pulseStep = 0.5
+    pulseUnits: str = "us"
+    thresholdCurrent = 2.5
+    thresholdVoltage = 2000
+    minTemp = 18
+    maxTemp = 30
+    testInterval = 3
+    testCurrent = 1.5
+    lpulseCurrent = 1.5
+    vin = 15
+    currentLimit = 2
+    vaux = 5.3
+    iaux = 1
+    setTemp = 85
+    setTempRange = 1
+    preheat = False
 
+# declare instance
+testInfo = CLtestInfo()
 
-def update_from_dict(self, data):
-    for key, value in data.items():
-        if hasattr(self, key):
-            setattr(self, key, value)
 
 @dataclass
 class CLtestData:
@@ -146,38 +199,37 @@ class CLtestData:
     measured test results
     status codes ennum below
     '''
-    def __init__(self):
-        self.status = 0
-        self.priInd = None
-        self.secInd = None
-        self.priLkg = None
-        self.priQ = None
-        self.priRes = None
-        self.secRes = None
-        self.coupling = None
-        self.irVoltage = None
-        self.irResistance = None
-        self.irTime = None
-        self.hipotVoltage = None
-        self.hipotCurrent = None
-        self.hipotTime = None
-        self.indInd = []
-        self.indQ = []
-        self.indBias = []
-        self.indRes = None
-        self.indSetBias = None
-        self.vin = None
-        self.ipk = None
-        self.vout = None
-        self.voutlp = None
-        self.pulseWidth = None
-        self.lpulse = None
-        self.lpulseSpecific = None
-        self.finalTemp = None
-        self.tempDiff = None
-        self.vdss = None
-        self.testTime = None
-        self.logTime = None
+    status = 0
+    priInd = None
+    secInd = None
+    priLkg = None
+    priQ = None
+    priRes = None
+    secRes = None
+    coupling = None
+    irVoltage = None
+    irResistance = None
+    irTime = None
+    hipotVoltage = None
+    hipotCurrent = None
+    hipotTime = None
+    indInd = []
+    indQ = []
+    indBias = []
+    indRes = None
+    indSetBias = None
+    vin = None
+    ipk = None
+    vout = None
+    voutlp = None
+    pulseWidth = None
+    lpulse = None
+    lpulseSpecific = None
+    finalTemp = None
+    tempDiff = None
+    vdss = None
+    testTime = None
+    logTime = None
 
     def appendInd(self, value):
         self.indInd.append(value)
@@ -188,55 +240,58 @@ class CLtestData:
     def appendBias(self, value):
         self.indBias.append(value)
 
+# declare instance
+testData = CLtestData()
+
+
 @dataclass
 class CLtestLimits(object):
     '''
     test limits retrieved from database
     '''
-    def __init__(self):
-            self.partNum = None       # was Part_Num
-            self.designNum = None     # was Design_Num
-            self.numPositions = None  # was Num_Positions
-            self.numTerms = None
-            self.numVariants = None
-            self.prefireFixture = None
-            self.fixtureNum = None    # was Fixture
-            self.testType = None
-            self.priLmin = None
-            self.priLmax = None
-            self.priQmin = None
-            self.priRmin = None
-            self.priRmax = None
-            self.leakageMin = None
-            self.leakageMax = None
-            self.coupling = None
-            self.secLmin = None
-            self.secLmax = None
-            self.secRmin = None
-            self.secRmax = None
-            self.pulseLmin = None     # was LPulsemin
-            self.pulseLmax = None     # was LPulsemax
-            self.outputVoltmin = None    # was Voutmin
-            self.pulseLcur = None     # was IPulse
-            self.hipotVoltage = None  # was VHipot
-            self.hipotRamp = None
-            self.hipotCur = None      # was IHipot
-            self.hipotTime = None     # was THipot
-            self.irVoltage = None
-            self.irResistance = None
-            self.irTime = None
-            self.stxPercentChange = None  # was STX%change
-            self.outputVoltmin85 = None   # was Voutmin85
-            self.pulseLmin85 = None       # was LPulsemin85
-            self.outputGraphline = None
-            self.startPulseWidth = None   # was StartingPulseWidth
-            self.turnsRatio = None
-            self.lcrlevel = None
-            self.indL100min = None
-            self.indL100max = None
-            self.satCur = None
-            self.satLminPercent = None    # Lsatmin%
-            self.hipotType = None
+    partNum = None       # was Part_Num
+    designNum = None     # was Design_Num
+    numPositions = None  # was Num_Positions
+    numTerms = None
+    numVariants = None
+    prefireFixture = None
+    fixtureNum = None    # was Fixture
+    testType = None
+    priLmin = None
+    priLmax = None
+    priQmin = None
+    priRmin = None
+    priRmax = None
+    leakageMin = None
+    leakageMax = None
+    coupling = None
+    secLmin = None
+    secLmax = None
+    secRmin = None
+    secRmax = None
+    pulseLmin = None     # was LPulsemin
+    pulseLmax = None     # was LPulsemax
+    outputVoltmin = None    # was Voutmin
+    pulseLcur = None     # was IPulse
+    hipotVoltage = None  # was VHipot
+    hipotRamp = None
+    hipotCur = None      # was IHipot
+    hipotTime = None     # was THipot
+    irVoltage = None
+    irResistance = None
+    irTime = None
+    stxPercentChange = None  # was STX%change
+    outputVoltmin85 = None   # was Voutmin85
+    pulseLmin85 = None       # was LPulsemin85
+    outputGraphline = None
+    startPulseWidth = None   # was StartingPulseWidth
+    turnsRatio = None
+    lcrlevel = None
+    indL100min = None
+    indL100max = None
+    satCur = None
+    satLminPercent = None    # Lsatmin%
+    hipotType = None
 
     def __getitem__(self, key):
         raise TypeError(f"{self.__class__.__name__} object is not subscriptable")
@@ -249,6 +304,10 @@ class CLtestLimits(object):
             if hasattr(self, key):
                 setattr(self, key, value)
 
+# declare instance
+testLimits = CLtestLimits()
+
+
 class StatusCodeText():
     def __init__(self):
         self.codes('Undetermined', 'Good part', 'Parameter test failure', 'IR failure',
@@ -258,6 +317,7 @@ class StatusCodeText():
                    'Primary Q', 'Leakage inductance', 'Secondary inductance',
                    'Secondary resistance', 'Failed preLAT', 'Rework')
 
+@dataclass
 class TestBoardBits(Enum):
     ledGrn = 0  # pass
     ledRed = 1  # fail
@@ -268,6 +328,8 @@ class TestBoardBits(Enum):
     secShort = 6  # k6, short sec
     priSide = 7  # k2, k4 pri
 
+
+@dataclass
 class StatusCode(Enum):
     '''
     a part is undetermined '0' until it has passed all tests when it becomes '1'
@@ -317,11 +379,11 @@ class testLimitsDict(object):
 
 
 # declare variables
-system = CLsystem()
-initValues = CLinitValues()
-testInfo = CLtestInfo()
-testData = CLtestData()
-testLimits = CLtestLimits()
+#system = CLsystem()
+#initValues = CLinitValues()
+#testInfo = CLtestInfo()
+#testData = CLtestData()
+#testLimits = CLtestLimits()
 
 #boardNum = 0
 
