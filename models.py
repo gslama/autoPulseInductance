@@ -32,7 +32,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -40,7 +40,8 @@ class DataBase:
         cursor = conn.cursor()
 
         # find partno in database
-        cursor.execute("SELECT Design_Num FROM Limits WHERE Part_Num='" + partNum + "';")
+        cursor.execute(f"SELECT Design_Num FROM {gb.initValues.barLimitTable} WHERE Part_Num = ?",
+                       (partNum,))
         row = cursor.fetchone()
 
         # if empty
@@ -56,7 +57,7 @@ class DataBase:
         return designNum
 
 
-    def check_record_exists(self, bar_num):
+    def check_record_exists(self, barNum):
         """
         check if record exists
         :return: true if exists
@@ -65,7 +66,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -73,7 +74,8 @@ class DataBase:
         cursor = conn.cursor()
 
         # find partno in database
-        cursor.execute(f"SELECT * FROM Electrical WHERE Bar_Num='{bar_num}';")
+        cursor.execute(f"SELECT * FROM {gb.initValues.barDataTable} WHERE Bar_Num = ?",
+                       (barNum,))
         row = cursor.fetchone()
 
         # if empty
@@ -88,7 +90,7 @@ class DataBase:
         return status
 
 
-    def get_part_number(self, bar_num):
+    def get_part_number(self, barNum):
         """
         check if record exists and gets catalog_num
         :return: true if exists
@@ -97,7 +99,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -105,7 +107,8 @@ class DataBase:
         cursor = conn.cursor()
 
         # find partno in database
-        cursor.execute(f"SELECT * FROM Electrical WHERE Bar_Num='{bar_num}';")
+        cursor.execute(f"SELECT * FROM {gb.initValues.barDataTable} WHERE Bar_Num = ?;",
+                       (barNum,))
         row = cursor.fetchone()
 
         # if empty
@@ -133,7 +136,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -142,8 +145,8 @@ class DataBase:
         conn.autocommit = True
 
         # update database
-        cursor.execute("UPDATE Electrical SET Defect = ? WHERE PrimeKey = ?",
-                       defectCode, serialNum)
+        cursor.execute(f"UPDATE {gb.initValues.barDataTable} SET Defect = ? WHERE PrimeKey = ?",
+                       (defectCode, serialNum))
         conn.close()
         return
 
@@ -159,7 +162,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -168,8 +171,8 @@ class DataBase:
         conn.autocommit = True
 
         # update database
-        cursor.execute("UPDATE Electrical SET Status = ? WHERE PrimeKey = ?",
-                       statusCode, serialNum)
+        cursor.execute(f"UPDATE {gb.initValues.barDataTable} SET Status = ? WHERE PrimeKey = ?",
+                       (statusCode, serialNum))
         conn.close()
         return
 
@@ -184,7 +187,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -192,8 +195,8 @@ class DataBase:
         cursor = conn.cursor()
 
         # update database
-        cursor.execute("SELECT Status FROM Electrical WHERE PrimeKey = ?",
-                       serialNum)
+        cursor.execute(f"SELECT Status FROM {gb.initValues.barDataTable} WHERE PrimeKey = ?",
+                       (serialNum,))
         row = cursor.fetchone()
 
         conn.close()
@@ -211,7 +214,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -221,7 +224,7 @@ class DataBase:
 
         # update database
         cursor.execute(
-            "UPDATE Electrical SET Vout25 = ?, LPulse25 = ? WHERE PrimeKey = ?",
+            f"UPDATE {gb.initValues.barDataTable} SET Vout25 = ?, LPulse25 = ? WHERE PrimeKey = ?",
             (gb.testData.vout, gb.testData.lpulse, serialNum))
 
         conn.close()
@@ -239,7 +242,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -249,7 +252,7 @@ class DataBase:
 
         # update database
         cursor.execute(
-            "UPDATE Electrical SET Vout85 = ?, LPulse85 = ? WHERE PrimeKey = ?",
+            f"UPDATE {gb.initValues.barDataTable} SET Vout85 = ?, LPulse85 = ? WHERE PrimeKey = ?",
             (gb.testData.vout, gb.testData.lpulse, serialNum))
 
         conn.close()
@@ -267,7 +270,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -275,7 +278,8 @@ class DataBase:
         cursor = conn.cursor()
 
         # find partnums in database with good status and return in order
-        cursor.execute("SELECT convert(varchar,Part_Num) FROM Electrical WHERE Bar_Num='" + barNum + "' and (Status = 0 or Status = 1) order by Part_Num ASC;")
+        cursor.execute(f"SELECT convert(varchar,Part_Num) FROM {gb.initValues.barDataTable} WHERE Bar_Num = ? and (Status = 0 or Status = 1) order by Part_Num ASC",
+                       (barNum,))
         rows = cursor.fetchall()
 
         list = []
@@ -296,7 +300,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -306,7 +310,7 @@ class DataBase:
 
         # update database
         cursor.execute(
-            "UPDATE Electrical SET Status = ?, IRVoltage = ?, IRResistance = ?, IRTime = ?, VHypot = ?, IHypot = ?, THypot = ? WHERE PrimeKey = ?",
+            f"UPDATE {gb.initValues.barDataTable} SET Status = ?, IRVoltage = ?, IRResistance = ?, IRTime = ?, VHypot = ?, IHypot = ?, THypot = ? WHERE PrimeKey = ?",
             statusCode, gb.testData.irVoltage, gb.testData.irResistance, gb.testData.irTime, gb.testData.hipotVoltage, gb.testData.hipotCurrent,
             gb.testData.hipotTime, serialNum)
 
@@ -325,7 +329,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -333,7 +337,8 @@ class DataBase:
         cursor = conn.cursor()
 
         # find partno in database
-        cursor.execute("SELECT * FROM Limits WHERE Part_Num='" + query + "';")
+        cursor.execute(f"SELECT * FROM {gb.initValues.barLimitTable} WHERE Part_Num = ?",
+                       (query,))
         row = cursor.fetchone()
 
         #unpacked = [{k: item[k] for k in item.keys()} for item in row]
@@ -427,7 +432,7 @@ class DataBase:
         conn = pyodbc.connect(
             f"DRIVER={{ODBC Driver 18 for SQL Server}};"
             f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.partLimitsDataBase};"
+            f"DATABASE={gb.initValues.barDataBase};"
             f"UID={gb.initValues.serverUserName};"
             f"PWD={gb.initValues.serverPassword};"
             f"ENCRYPT=no;"
@@ -437,7 +442,7 @@ class DataBase:
 
         # update database
         cursor.execute(
-            "UPDATE Electrical SET Status = ?, LPulse = ?, VOut = ?, IPulse = ?, LPulse25= ?, Vout25 = ? WHERE PrimeKey = ?",
+            f"UPDATE {gb.initValues.barDataTable} SET Status = ?, LPulse = ?, VOut = ?, IPulse = ?, LPulse25 = ?, Vout25 = ? WHERE PrimeKey = ?",
             gb.testData.status, gb.testData.lpulse, gb.testData.vout, gb.testData.ipk, gb.testData.lpulse, gb.testData.vout, gb.testInfo.serialNumber )
 
         conn.close()

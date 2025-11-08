@@ -186,7 +186,7 @@ def setup_tek_scope():
     """
     # setup oscilloscope
     try:
-        instr = rm.open_resource(gb.initValues['scopeAdr'])
+        instr = rm.open_resource(gb.initValues.scopeAdr)
     except Exception as e:
         print('oscilloscope is offline', e)
     else:
@@ -264,7 +264,7 @@ def setup_scanner():
     # setup scanner
     # will still need scanner to measure temperature and voltage
     try:
-        instr = rm.open_resource(gb.initValues['scannerAdr'])
+        instr = rm.open_resource(gb.initValues.scannerAdr)
     except Exception as e:
         print('scanner is offline', e)
     else:
@@ -333,7 +333,7 @@ def setup_rs_scope():
 
     # setup oscilloscope
     try:
-        instr = rm.open_resource(gb.initValues['scopeAdr'])
+        instr = rm.open_resource(gb.initValues.scopeAdr)
     except Exception as e:
         print('oscilloscope is offline', e)
     else:
@@ -676,7 +676,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
     else:
         target_ipk = 0
 
-    if meas_ipk < target_ipk * float(gb.initValues['ipeakLo']) or meas_ipk > target_ipk * float(gb.initValues['ipeakHi']):
+    if meas_ipk < target_ipk * float(gb.initValues.ipeakLo) or meas_ipk > target_ipk * float(gb.initValues.ipeakHi):
         messagebox.showerror(title="Test Error", message="Pulse width out of range. Check connections or part")
         abort_flag = True
         #return
