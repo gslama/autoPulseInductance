@@ -173,83 +173,6 @@ def setup_scope(scope):
     scope.set_trigger_edge("FALL")
 
 
-def setup_tek_scope():
-    """
-    Setup for Tek scopes
-    some assumptions:
-        channel 1 is used for triggering from the signal generator
-        channel 2 is for vdss with 10:1 probe
-        channel 3 is for current probe or direct into 1 Mohm
-            the two current probes have different setups
-        channel 4 not used
-    :return: 
-    """
-    # setup oscilloscope
-    try:
-        instr = rm.open_resource(gb.initValues.scopeAdr)
-    except Exception as e:
-        print('oscilloscope is offline', e)
-    else:
-        # reset all
-        instr.write('*RST')
-        # setup parameters for Vout vs Ipk, Vds testing
-        # setup channel one - trigger channel from oscillator
-        instr.write("SELECT:CH1 ON")    #'CHAN1:STATE ON'
-        instr.write("CH1:SCALE 1E1")    #'CHAN1:SCALE 1E1'
-        instr.write("CH1:POSITION 2.0") #'CHAN1:POSITION 2.0'
-
-        # setup channel 2 - Vdss 1:10 voltage probe
-        instr.write("SELECT:CH2 ON")        #'CHAN2:STATE ON'
-        instr.write("CH2:SCALE 1E2")        #'CHAN2:SCALE 1E1'
-        instr.write("CH2:POSITION -1.0")    #'CHAN2:POSITION -1.0'
-
-        # setup channel 3 - Ipri - current resistor assumed
-        instr.write("SELECT:CH3 ON")        #'CHAN3:STATE ON'
-        instr.write("CH3:SCALE 500E-3")     #'CHAN3:SCALE 200E-3'
-        instr.write("CH3:COUPLING DC")      #'CHAN3:COUPING DCLIMIT'
-        instr.write("CH3:IMPEDANCE FIFTY")  # doesn't have this option
-        instr.write("CH3:POSITION -3.0")    #'CHAN3:POSITION -1.0'
-        instr.write("CH3:BANDWIDTH TWENTY") #'CHAN3:BANDWIDTH B20'
-
-        # determine current probe type
-        #If frmSetup.optCurP6021.Value == True:
-        #  instr.write("CH3:SCALE 100E-3")
-        #   instr.write("CH3:COUPLING AC")
-        #   instr.write("CH3:IMPEDANCE MEG")
-        #   msCurFactor = 10
-        #Elsif frmSetup.optCurTCP202.Value == True:
-        #   instr.write("CH3:COUPLING DC")
-        #   instr.write("CH3:SCALE 1E0")
-        #   instr.write("CH3:IMPEDANCE FIFTY")
-        #   msCurFactor = 1
-
-        # setup channel 4
-        instr.write("SELECT:CH4 OFF")   #'CHAN4:STATE OFF'
-
-        # measurements
-        instr.write("MEASUREMENT:MEAS1:TYPE MAXIMUM")   #'MEASUREMENT1:TYPE UPE'
-        instr.write("MEASUREMENT:MEAS1:SOURCE CH3")     #'MEASUREMENT1:SOURCE CH3'
-        instr.write("MEASUREMENT:MEAS1:STATE ON")       #'MEASUREMENT1:ENABLE ON'
-
-        instr.write("MEASUREMENT:MEAS2:TYPE MAXIMUM")   #'MEASUREMENT2:TYPE UPE'
-        instr.write("MEASUREMENT:MEAS2:SOURCE CH2")     #'MEASUREMENT2:SOURCE CH2'
-        instr.write("MEASUREMENT:MEAS2:STATE ON")       #'MEASUREMENT2:ENABLE ON'
-
-        # setup timing scale
-        instr.write("HORIZONTAL:MAIN:SCALE 1E-6")       #'TIMEBASE:SCALE 1E-6'
-        instr.write("HORIZONTAL:DELAY:STATE OFF")       #''
-        instr.write("HORIZONTAL:TRIGGER:POSITION 10")   #'TIMEBASE:REFERENCE 10'
-
-        # setup triggering
-        instr.write("ACQUIRE:STOPAFTER RUNSTOP")        #'ACQUIRE:'
-        instr.write("ACQUIRE:STATE 1")                  #'ACQUIRE:'
-        instr.write("ACQUIRE:MODE SAMPLE")              #'CHANNEL1:TYPE SAMPLE'
-        instr.write("TRIGGER:MAIN:MODE NORMAL")         #'TRIGGER:A:MODE NORMAL'
-        instr.write("TRIGGER:MAIN:EDGE:SOURCE CH1")     #'TRIGGER:A:SOURCE CH1'
-        instr.write("TRIGGER:MAIN:LEVEL 4.0")           #'TRIGGER:A:LEVEL 4.0'
-        instr.write("TRIGGER:MAIN:EDGE:COUPLING DC")    #'TRIGGER:A:EDGE:COUPLING DC'
-        instr.write("TRIGGER:MAIN:EDGE:SLOPE RISE")     #'TRIGGER:A:EDGE:SLOPE POSITIVE'
-        instr.close()
 
 def setup_scanner():
     """
@@ -320,92 +243,6 @@ def setup_power_supply():
     gb.power.set_power_state(1, 'ON')
 
 
-def setup_rs_scope():
-    '''
-    this is used to test program using slamatech instruments
-    scope: Rohde&Swartz RTB2004
-    signal generator: Siglent SDG2042
-    power supply: GwInstek GPP4323
-    temperature:
-    :return:
-    '''
-
-
-    # setup oscilloscope
-    try:
-        instr = rm.open_resource(gb.initValues.scopeAdr)
-    except Exception as e:
-        print('oscilloscope is offline', e)
-    else:
-        # reset all
-        instr.write('*RST')
-        # setup parameters for Vout vs Ipk, Vds testing
-        # setup channel one - trigger channel from oscillator
-        instr.write('CHAN1:STATE ON')
-        instr.write('PROBE1:SET:ATT:MAN 10')
-        instr.write('CHAN1:SCALE 5')
-        instr.write('CHAN1:POSITION 2.0')
-        instr.write('CHAN1:BANDWIDTH B20')
-
-        # setup channel 2 - Vdss 1:10 voltage probe
-        instr.write('CHAN2:STATE ON')
-        instr.write('PROBE1:SET:ATT:MAN 10')
-        instr.write(f'CHAN2:SCALE {gb.testInfo.vdssScale}')
-        instr.write('CHAN2:POSITION -2.0')
-        instr.write('CHAN2:BANDWIDTH B20')
-
-        # setup channel 3 - Ipri - current resistor assumed
-        instr.write('CHAN3:STATE ON')
-        instr.write(f'CHAN3:SCALE {gb.testInfo.currentScale}')
-        instr.write('CHAN3:COUPING DCLIMIT')
-        #instr.write("CH3:IMPEDANCE FIFTY")  # doesn't have this option
-        instr.write('CHAN3:POSITION -3.0')
-        instr.write('CHAN3:BANDWIDTH B20')
-
-        # determine current probe type
-        #If frmSetup.optCurP6021.Value == True:
-        #   instr.write("CHAN3:SCALE 100E-3")
-        #   instr.write("CHAN3:COUPLING AC")
-        #instr.write("CHAN3:IMPEDANCE MEG")
-        #msCurFactor = 10
-        #Elsif frmSetup.optCurTCP202.Value == True:
-        #   instr.write("CH3:COUPLING DC")
-        #   instr.write("CH3:SCALE 1E0")
-        #   instr.write("CH3:IMPEDANCE FIFTY")
-        #   msCurFactor = 1
-
-        # setup channel 4
-        instr.write('CHAN4:STATE OFF')
-
-        # measurements
-        instr.write('MEASUREMENT1:MAIN UPE')
-        instr.write('MEAS1:SOURCE CH3')
-        instr.write('MEAS1:ENABLE ON')
-
-        instr.write('MEASUREMENT2:MAIN UPE')
-        instr.write('MEASUREMENT2:SOURCE CH2')
-        instr.write('MEASUREMENT2:ENABLE ON')
-
-        # setup timing scale
-        timebase_scale = 1E-6  #normally 1E-6
-        instr.write(f'TIMEBASE:SCALE {timebase_scale}')
-        #instr.write("HORIZONTAL:DELAY:STATE OFF")       #''
-        instr.write('TIMEBASE:REFERENCE 10')
-
-        # setup triggering
-        #instr.write("ACQUIRE:STOPAFTER RUNSTOP")        #'ACQUIRE:'
-        #instr.write("ACQUIRE:STATE 1")                  #'ACQUIRE:'
-        instr.write('CHANNEL1:TYPE SAMPLE')
-        instr.write('TRIGGER:A:MODE NORMAL')
-        instr.write('TRIGGER:A:SOURCE CH1')
-        trigger_level = 3  #NORMALLY 4
-        instr.write(f'TRIGGER:A:LEVEL {trigger_level}')
-        instr.write('TRIGGER:A:EDGE:COUPLING DC')
-        instr.write('TRIGGER:A:EDGE:SLOPE POSITIVE')
-        instr.close()
-
-
-
 def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
     '''
     This tests the output by turning on power, and using a single long pulse to get
@@ -439,7 +276,6 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
     else:
         pulse_units = 1
 
-    # reducing starting width by one pulse step because loop adds one step immediately
     pulse_width = float(gb.testInfo.pulseStop)
 
     # check part temperature is in range
@@ -636,7 +472,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         update_queue.put(label_update)
 
         # scale to ratio and convert of amps
-        meas_ipk = meas_ipk / (gb.testInfo.currentRatio * 1E-3)
+        meas_ipk = meas_ipk / (float(gb.testInfo.currentRatio) * 1E-3)
         gb.testData.ipk = meas_ipk
         # display
         label_update = {'type': 'label', 'label_name': 'ipk', 'value': f"{gb.testData.ipk:.3f}", 'color': "grey85"}
@@ -655,6 +491,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
 
     # check for errors
     # minimum pulse width - value based on empirical testing
+    #print(f"i: {i}, meas_pulse_width: {meas_pulse_width}")
     if meas_pulse_width:
         if meas_pulse_width < 1.5E-6:
             messagebox.showerror(title="Test Error", message="Pulse width too short. Check connections or part")
@@ -673,11 +510,13 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
     match = re.search(r"[-+]?\d*\.?\d+", gb.testInfo.currentProbe)
     if match:
         target_ipk = float(match.group())
+        print(f"probe: {gb.testInfo.currentProbe}, target ipk: {target_ipk}")
     else:
         target_ipk = 0
 
-    if meas_ipk < target_ipk * float(gb.initValues.ipeakLo) or meas_ipk > target_ipk * float(gb.initValues.ipeakHi):
-        messagebox.showerror(title="Test Error", message="Pulse width out of range. Check connections or part")
+    # ipeakLo and ipeakHi are tolerance multipliers to the target value
+    if meas_ipk < target_ipk * gb.initValues.ipeakLo or meas_ipk > target_ipk * gb.initValues.ipeakHi:
+        messagebox.showerror(title="Test Error", message=f"Peak current {meas_ipk:.3f} A out of range {target_ipk * gb.initValues.ipeakLo:.3f} A to {target_ipk * gb.initValues.ipeakHi:.3f} A. Change tolerance or trim sense resistor.")
         abort_flag = True
         #return
 

@@ -877,8 +877,8 @@ class SetupView(tk.Toplevel):
         self.current_scale.set(gb.testInfo.currentRatio)
         self.option_map = {
             '1.5 A (0.604R)': 597,
-            '2.4 A (0.374R)': 111,  #todo need the right number here
-            '2.7 A (0.332R)': 328,
+            '2.4 A (0.374R)': 371,
+            '2.7 A (0.332R)': 330,   # was 328 but calc'd value is 330
             'Other': None
         }
         currentfrm = ttk.LabelFrame(self, text=" Current Measurement ", width=200, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
@@ -891,7 +891,7 @@ class SetupView(tk.Toplevel):
 
         self.current_scale_entry = ttk.Entry(currentfrm, width=7)
         self.current_scale_entry.grid(column=0, row=5, padx=(0, 10), pady=5, sticky="we")
-        self.current_scale_entry.insert(0, str(self.option_map['1.5 A (0.604R)']))
+        self.current_scale_entry.insert(0, str(self.option_map['2.7 A (0.332R)']))
         self.current_scale_entry.config(state="disabled")
         ttk.Label(currentfrm, text="mV/A").grid(column=1, row=5, sticky="w")
 

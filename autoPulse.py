@@ -15,7 +15,7 @@ import json
 import MainView
 import tkinter as tk
 from tkinter import ttk, messagebox, font
-import globals as gb
+import globals as gb  # loads init files
 
 from Oscilloscopes.scope_base import Scope
 from SignalGenerators.signal_gen_base import SignalGenerator
@@ -57,27 +57,6 @@ root_color = '#778899'
 text_color ='#f8f8f8'
 frame_color = '#dcdcdc'
 #root.config(bg=root_color)
-
-"""
-# get init values from init file
-try:
-    with open("testerInit.txt", "r") as file:
-        jsonStr = file.read()
-
-    gb.initValues = json.loads(jsonStr)
-    #print("imported InitValues:")
-    #for key, value in gb.initValues.items():
-    #    print(f"{key}: {value}")
-except FileNotFoundError:
-    print("File not found.")
-    messagebox.showerror(title="File Open", message="testerInit.txt - File not found")
-except IOError:
-    print("Error reading the file.")
-    messagebox.showerror(title="File OPen", message="testerInit.txt - Error reading file.")
-except Exception as e:
-    print("An error occurred:", str(e))
-    messagebox.showerror(title="File Open", message="testerInit.txt - File error on open", detail=str(e))
-"""
 
 # load instruments
 gb.scope = Scope.factory(gb.initValues.scopeMeter, gb.initValues.scopeAdr)

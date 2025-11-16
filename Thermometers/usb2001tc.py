@@ -26,13 +26,12 @@ class USB2001TC(Thermometer):
     def __init__(self, port):
 
         try:
-            self.initMmcDaq()
+            self.initMmcDaq(port)
         except Exception as e:
-            print('meter offline.', e)
+            print('thermometer offline.', e)
             # messagebox to indicate error
             messagebox.showerror('Error', 'The USB-2001-TC is offline. Check power and connections. Then close and restart.')
         else:
-
             # todo check - does not support *tst?
             #test = self.visa_session.query('*TST?')
             #assert test == '0', f"Initial test return fail: {test}"
@@ -52,6 +51,7 @@ class USB2001TC(Thermometer):
 
         # return formatted
         return float(f"{temp_c:.2f}")
+
     """
     def set_temp_chan(self, chan, type):
         # chan = 1 to 16, 20, 40 depends on card
@@ -61,7 +61,7 @@ class USB2001TC(Thermometer):
         self.visa_session.write(f"conf:temp tc,{type},(@{chan})")
     """
 
-    def initMmcDaq(self):
+    def initMmcDaq(self, port):
         # By default, the example detects and displays all available devices and
         # selects the first device listed. Use the dev_id_list variable to filter
         # detected devices by device ID (see UL documentation for device IDs).
@@ -69,8 +69,8 @@ class USB2001TC(Thermometer):
         # match the desired board number configured with Instacal.
         use_device_detection = True
         dev_id_list = []
-        boardNum = int(gb.initValues['thermoAdr']) #- doesn't work - not subscriptable
-        #boardNum = int(gb.initValues.boardNum)
+        #boardNum = int(gb.initValues['thermoAdr']) #- doesn't work - not subscriptable
+        boardNum = int(port)
         #boardNum = 1
         channel = 0
 

@@ -1,12 +1,11 @@
 """
 Home for global variables
-
-"powerUnit": "GPP4323",
-"powerAdr": "TCPIP0::192.168.88.48::1026::SOCKET",
 """
+
+
 import array as arr
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from tkinter import messagebox
 import os
 
@@ -37,7 +36,9 @@ system = CLsystem()
 class CLinitValues(object):
     '''
     These come from a file loaded at the start of the program
-    "testerInit.txt"
+    "testerInit.txt" expected in the local folder
+    However 'commonInitFile' points to another location where
+    additional common values can be stored for all programs
     '''
 
     commonInitFile: str = ""
@@ -78,6 +79,8 @@ class CLinitValues(object):
     lcrFrequency: int = 100000
     lcrCalLevel: float = 0.5
     lcrBias: float = 0
+    ipeakLo: float = 0.95
+    ipeakHi: float = 1.1
     debugLcr: int = 1
     debugMode: int = 0
     test: str = ""
@@ -378,12 +381,6 @@ class testLimitsDict(object):
         self.__dict__.update(kwargs)
 
 
-# declare variables
-#system = CLsystem()
-#initValues = CLinitValues()
-#testInfo = CLtestInfo()
-#testData = CLtestData()
-#testLimits = CLtestLimits()
 
-#boardNum = 0
+
 

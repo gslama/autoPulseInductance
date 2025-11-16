@@ -22,7 +22,7 @@ class DataBase:
     # testData = testData()
     #testInfo = testInfo()
 
-    def check_design_num(self, partNum):
+    def check_design_num(self, part_num):
         """
         checks part number is database and retrieves design number
         :param partNum:
@@ -41,7 +41,7 @@ class DataBase:
 
         # find partno in database
         cursor.execute(f"SELECT Design_Num FROM {gb.initValues.barLimitTable} WHERE Part_Num = ?",
-                       (partNum,))
+                       (part_num,))
         row = cursor.fetchone()
 
         # if empty
@@ -57,7 +57,7 @@ class DataBase:
         return designNum
 
 
-    def check_record_exists(self, barNum):
+    def check_record_exists(self, bar_num):
         """
         check if record exists
         :return: true if exists
@@ -75,7 +75,7 @@ class DataBase:
 
         # find partno in database
         cursor.execute(f"SELECT * FROM {gb.initValues.barDataTable} WHERE Bar_Num = ?",
-                       (barNum,))
+                       (bar_num,))
         row = cursor.fetchone()
 
         # if empty
@@ -90,7 +90,7 @@ class DataBase:
         return status
 
 
-    def get_part_number(self, barNum):
+    def get_part_number(self, bar_num):
         """
         check if record exists and gets catalog_num
         :return: true if exists
@@ -108,7 +108,7 @@ class DataBase:
 
         # find partno in database
         cursor.execute(f"SELECT * FROM {gb.initValues.barDataTable} WHERE Bar_Num = ?;",
-                       (barNum,))
+                       (bar_num,))
         row = cursor.fetchone()
 
         # if empty
@@ -125,59 +125,8 @@ class DataBase:
         return status
 
 
-    def record_defect(self, defectCode, serialNum):
-        """
-        record defects and advance serial
-        :param defectCode:
-        :param serialNum:
-        :return:
-        """
 
-        conn = pyodbc.connect(
-            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-            f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.barDataBase};"
-            f"UID={gb.initValues.serverUserName};"
-            f"PWD={gb.initValues.serverPassword};"
-            f"ENCRYPT=no;"
-        )
-        cursor = conn.cursor()
-        conn.autocommit = True
-
-        # update database
-        cursor.execute(f"UPDATE {gb.initValues.barDataTable} SET Defect = ? WHERE PrimeKey = ?",
-                       (defectCode, serialNum))
-        conn.close()
-        return
-
-
-    def record_status(self, statusCode, serialNum):
-        """
-        record status code
-        :param statusCode:
-        :param serialNum:
-        :return:
-        """
-
-        conn = pyodbc.connect(
-            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-            f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.barDataBase};"
-            f"UID={gb.initValues.serverUserName};"
-            f"PWD={gb.initValues.serverPassword};"
-            f"ENCRYPT=no;"
-        )
-        cursor = conn.cursor()
-        conn.autocommit = True
-
-        # update database
-        cursor.execute(f"UPDATE {gb.initValues.barDataTable} SET Status = ? WHERE PrimeKey = ?",
-                       (statusCode, serialNum))
-        conn.close()
-        return
-
-
-    def get_record_stats(self, serialNum):
+    def get_record_stats(self, serial_num):
         '''
         retirns part status
         :param serialNum:
@@ -196,67 +145,11 @@ class DataBase:
 
         # update database
         cursor.execute(f"SELECT Status FROM {gb.initValues.barDataTable} WHERE PrimeKey = ?",
-                       (serialNum,))
+                       (serial_num,))
         row = cursor.fetchone()
 
         conn.close()
         return row[0]
-
-
-    def record_test_data_25(self, serialNum):
-        """
-        record measured test data
-        :param data:
-        :param parameters:
-        :return:
-        """
-
-        conn = pyodbc.connect(
-            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-            f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.barDataBase};"
-            f"UID={gb.initValues.serverUserName};"
-            f"PWD={gb.initValues.serverPassword};"
-            f"ENCRYPT=no;"
-        )
-        cursor = conn.cursor()
-        conn.autocommit = True
-
-        # update database
-        cursor.execute(
-            f"UPDATE {gb.initValues.barDataTable} SET Vout25 = ?, LPulse25 = ? WHERE PrimeKey = ?",
-            (gb.testData.vout, gb.testData.lpulse, serialNum))
-
-        conn.close()
-        return
-
-
-    def record_test_data_85(self, serialNum):
-        """
-        record measured test data
-        :param data:
-        :param parameters:
-        :return:
-        """
-
-        conn = pyodbc.connect(
-            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-            f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.barDataBase};"
-            f"UID={gb.initValues.serverUserName};"
-            f"PWD={gb.initValues.serverPassword};"
-            f"ENCRYPT=no;"
-        )
-        cursor = conn.cursor()
-        conn.autocommit = True
-
-        # update database
-        cursor.execute(
-            f"UPDATE {gb.initValues.barDataTable} SET Vout85 = ?, LPulse85 = ? WHERE PrimeKey = ?",
-            (gb.testData.vout, gb.testData.lpulse, serialNum))
-
-        conn.close()
-        return
 
 
     def get_good_part_list(self, barNum):
@@ -289,33 +182,6 @@ class DataBase:
 
         conn.close()
         return list
-
-
-    def record_hipot_data(statusCode,serialNum):
-        """
-        record IR-Hipot test results
-        :return:
-        """
-
-        conn = pyodbc.connect(
-            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-            f"SERVER={gb.initValues.sqlServer};"
-            f"DATABASE={gb.initValues.barDataBase};"
-            f"UID={gb.initValues.serverUserName};"
-            f"PWD={gb.initValues.serverPassword};"
-            f"ENCRYPT=no;"
-        )
-        cursor = conn.cursor()
-        conn.autocommit = True
-
-        # update database
-        cursor.execute(
-            f"UPDATE {gb.initValues.barDataTable} SET Status = ?, IRVoltage = ?, IRResistance = ?, IRTime = ?, VHypot = ?, IHypot = ?, THypot = ? WHERE PrimeKey = ?",
-            statusCode, gb.testData.irVoltage, gb.testData.irResistance, gb.testData.irTime, gb.testData.hipotVoltage, gb.testData.hipotCurrent,
-            gb.testData.hipotTime, serialNum)
-
-        conn.close()
-        return
 
 
     def load_test_limits(self, query):
@@ -422,6 +288,86 @@ class DataBase:
         return packed
 
 
+    def record_defect(self, defectCode, serialNum):
+        """
+        record defects and advance serial
+        :param defectCode:
+        :param serialNum:
+        :return:
+        """
+
+        conn = pyodbc.connect(
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.barDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
+        cursor = conn.cursor()
+        conn.autocommit = True
+
+        # update database
+        cursor.execute(f"UPDATE {gb.initValues.barDataTable} SET Defect = ? WHERE PrimeKey = ?",
+                       (defectCode, serialNum))
+        conn.close()
+        return
+
+
+    def record_status(self, statusCode, serialNum):
+        """
+        record status code
+        :param statusCode:
+        :param serialNum:
+        :return:
+        """
+
+        conn = pyodbc.connect(
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.barDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
+        cursor = conn.cursor()
+        conn.autocommit = True
+
+        # update database
+        cursor.execute(f"UPDATE {gb.initValues.barDataTable} SET Status = ? WHERE PrimeKey = ?",
+                       (statusCode, serialNum))
+        conn.close()
+        return
+
+
+
+    def record_hipot_data(statusCode,serialNum):
+        """
+        record IR-Hipot test results
+        :return:
+        """
+
+        conn = pyodbc.connect(
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.barDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
+        cursor = conn.cursor()
+        conn.autocommit = True
+
+        # update database
+        cursor.execute(
+            f"UPDATE {gb.initValues.barDataTable} SET Status = ?, IRVoltage = ?, IRResistance = ?, IRTime = ?, VHypot = ?, IHypot = ?, THypot = ? WHERE PrimeKey = ?",
+            statusCode, gb.testData.irVoltage, gb.testData.irResistance, gb.testData.irTime, gb.testData.hipotVoltage, gb.testData.hipotCurrent,
+            gb.testData.hipotTime, serialNum)
+
+        conn.close()
+        return
+
+
     def record_output_data(self):
         '''
         add output test results to database
@@ -446,6 +392,61 @@ class DataBase:
             gb.testData.status, gb.testData.lpulse, gb.testData.vout, gb.testData.ipk, gb.testData.lpulse, gb.testData.vout, gb.testInfo.serialNumber )
 
         conn.close()
+
+
+    def record_test_data_25(self, serialNum):
+        """
+        record measured test data
+        :param data:
+        :param parameters:
+        :return:
+        """
+
+        conn = pyodbc.connect(
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.barDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
+        cursor = conn.cursor()
+        conn.autocommit = True
+
+        # update database
+        cursor.execute(
+            f"UPDATE {gb.initValues.barDataTable} SET Vout25 = ?, LPulse25 = ? WHERE PrimeKey = ?",
+            (gb.testData.vout, gb.testData.lpulse, serialNum))
+
+        conn.close()
+        return
+
+    def record_test_data_85(self, serialNum):
+        """
+        record measured test data
+        :param data:
+        :param parameters:
+        :return:
+        """
+
+        conn = pyodbc.connect(
+            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+            f"SERVER={gb.initValues.sqlServer};"
+            f"DATABASE={gb.initValues.barDataBase};"
+            f"UID={gb.initValues.serverUserName};"
+            f"PWD={gb.initValues.serverPassword};"
+            f"ENCRYPT=no;"
+        )
+        cursor = conn.cursor()
+        conn.autocommit = True
+
+        # update database
+        cursor.execute(
+            f"UPDATE {gb.initValues.barDataTable} SET Vout85 = ?, LPulse85 = ? WHERE PrimeKey = ?",
+            (gb.testData.vout, gb.testData.lpulse, serialNum))
+
+        conn.close()
+        return
 
     ## end of database class ==========================================================
 
