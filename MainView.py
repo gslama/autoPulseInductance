@@ -22,15 +22,16 @@ import bisect
 
 
 #import TestRoutines
-import models
+#import models
 import TestRoutines
 import globals as gb
 import os
-
 from TestRoutines import test_pulse
+from models import Database
+dbase = Database()
 
 # declare instance of dbase class
-dbase=models.DataBase()
+#dbase=models.DataBase()
 
 # global
 #stop_loop = False
@@ -551,10 +552,10 @@ class outputView(tk.Frame):
         #4 regardless pass or fail save data and status
         # standard or STx25
         if self.option_map[self.test_option.get()] == 1 or  self.option_map[self.test_option.get()] == 2:
-            dbase.record_test_data_25(gb.testInfo.serialNumber)
+            dbase.record_pulse_25_data(gb.testInfo.serialNumber)
         # STX85
         elif  self.option_map[self.test_option.get()] == 3:
-            dbase.record_test_data_85(gb.testInfo.serialNumber)
+            dbase.record_pulse_85_data(gb.testInfo.serialNumber)
 
         #5 issue pass/fail signal - not needed here
         #if self.status_flag:
@@ -646,7 +647,7 @@ class outputView(tk.Frame):
         #    return
 
         # get part number from database
-        if not dbase.get_part_number(self.bar):
+        if not dbase.get_part_number_for_bar(self.bar):
             messagebox.showerror(title="Bar No", message="Bar number do does not exist in database. ")
             return
         else:

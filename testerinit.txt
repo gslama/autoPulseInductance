@@ -3,3 +3,5 @@
 
 commonInitFile = commonInit.txt
 debugMode = 0
+ipeakLo = 0.95
+ipeakHi = 1.2

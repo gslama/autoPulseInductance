@@ -316,7 +316,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         # turn on signal generator
         gb.sig_gen.set_output_state('ON')
 
-        # wait a half second to stablize
+        # wait a half second to stabelize
         time.sleep(0.5)
 
         # monitor temperature until target
@@ -515,8 +515,11 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         target_ipk = 0
 
     # ipeakLo and ipeakHi are tolerance multipliers to the target value
-    if meas_ipk < target_ipk * gb.initValues.ipeakLo or meas_ipk > target_ipk * gb.initValues.ipeakHi:
-        messagebox.showerror(title="Test Error", message=f"Peak current {meas_ipk:.3f} A out of range {target_ipk * gb.initValues.ipeakLo:.3f} A to {target_ipk * gb.initValues.ipeakHi:.3f} A. Change tolerance or trim sense resistor.")
+    #print(isinstance(target_ipk, float))
+    #print(isinstance(gb.initValues.ipeakLo, float))
+    #print(isinstance(gb.initValues.ipeakHi, float))
+    if meas_ipk < target_ipk * float(gb.initValues.ipeakLo) or meas_ipk > target_ipk * float(gb.initValues.ipeakHi):
+        messagebox.showerror(title="Test Error", message=f"Peak current {meas_ipk:.3f} A out of range {target_ipk * float(gb.initValues.ipeakLo):.3f} A to {target_ipk * float(gb.initValues.ipeakHi):.3f} A. Change tolerance or trim sense resistor.")
         abort_flag = True
         #return
 
