@@ -1,5 +1,5 @@
 """
-MainView.py
+mainView.py
     All the screen interfaces
 
 
@@ -19,14 +19,9 @@ import win32com.client as win32
 import os
 import bisect
 
-
-
-#import TestRoutines
-#import models
-import TestRoutines
+import testRoutines
 import globals as gb
-import os
-from TestRoutines import test_pulse
+from testRoutines import test_pulse
 from models import Database
 dbase = Database()
 
@@ -396,12 +391,12 @@ class outputView(tk.Frame):
         newView = SetupView(self)
 
     def debug_mode(self):
-        if gb.system.debugMode:
-            gb.system.debugMode = False
+        if gb.system.debug_mode:
+            gb.system.debug_mode = False
             self.master.title("AutoParameters")
             print("debugMode OFF")
         else:
-            gb.system.debugMode = True
+            gb.system.debug_mode = True
             self.master.title("AutoParameters - Debug Mode")
             print("debugMode ON")
 
@@ -426,7 +421,7 @@ class outputView(tk.Frame):
         :return:
         """
         # call init_test
-        TestRoutines.init_test()
+        testRoutines.init_test()
         # if error, message and exit
         self.clear_display()
         # activate buttons

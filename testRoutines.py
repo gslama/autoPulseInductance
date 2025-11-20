@@ -1,5 +1,5 @@
 """
-TestRoutines.py
+testRoutines.py
     All the test sequences
 """
 import pyvisa

@@ -25,7 +25,7 @@ class CLsystem(object):
     '''
     # internal system variables, mostly status
     version: str = "1.0.0"
-    debugMode = True
+    debug_mode = True
     calibrated = False
     fixture: str = ""
 

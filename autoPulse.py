@@ -12,7 +12,7 @@ import sys
 import ctypes
 
 import json
-import MainView
+import mainView
 import tkinter as tk
 from tkinter import ttk, messagebox, font
 import globals as gb  # loads init files
@@ -67,7 +67,7 @@ gb.power = PowerSupply.factory(gb.initValues.powerUnit, gb.initValues.powerAdr)
 gb.thermo = Thermometer.factory(gb.initValues.thermoUnit, gb.initValues.thermoAdr)
 
 # create an instance of input view
-mainview = MainView.outputView(root)
+mainview = mainView.outputView(root)
 #mainview.config(bg=root_color)
 
 # place input view frame
