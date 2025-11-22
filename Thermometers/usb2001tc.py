@@ -26,15 +26,17 @@ class USB2001TC(Thermometer):
     def __init__(self, port):
 
         try:
-            self.initMmcDaq(port)
+            #self.initMmcDaq(port)
+            board_num = int(port)
+            name = ul.get_board_name(board_num)
         except Exception as e:
-            print('thermometer offline.', e)
+            print('meter offline.', e)
             # messagebox to indicate error
-            messagebox.showerror('Error', 'The USB-2001-TC is offline. Check power and connections. Then close and restart.')
+            messagebox.showerror('Error', f'The USB-2001-TC is offline. Check power and connections. Then close and restart. E: {e}')
         else:
-            # todo check - does not support *tst?
-            #test = self.visa_session.query('*TST?')
-            #assert test == '0', f"Initial test return fail: {test}"
+            print(f"Using MCC {name} as board: {board_num}")
+            # confirm the right box
+            ul.flash_led(board_num)
 
             self.mode = None
             self.status = None
