@@ -65,6 +65,10 @@ class outputView(tk.Frame):
         self.partList = ()
         self.results = dict()
 
+        self.status_box = StatusBox(self, height=3, max_lines=100)
+        self.status_box.grid(column=1, columnspan=3,row=8, padx=5, pady=5, sticky='ew')
+        self.status_box.grid_remove()
+
         # add menus
         # create widgets
         menubar = tk.Menu(self.master)
@@ -77,6 +81,7 @@ class outputView(tk.Frame):
         optionsmenu = tk.Menu(menubar, tearoff=False)
         menubar.add_cascade(label="Edit", menu=optionsmenu)
         optionsmenu.add_command(label="Settings", command=self.settings_window)
+        optionsmenu.add_command(label="Show GPIB Addresses", command=self.gpib_addressing)
         optionsmenu.add_command(label="Debug", command=self.debug_mode)
 
         helpmenu = tk.Menu(menubar, tearoff=False)
@@ -390,14 +395,19 @@ class outputView(tk.Frame):
     def settings_window(self):
         newView = SetupView(self)
 
+    def gpib_addressing(self):
+        GpibView(self)
+
     def debug_mode(self):
         if gb.system.debug_mode:
             gb.system.debug_mode = False
             self.master.title("AutoParameters")
+            self.status_box.grid_remove()
             print("debugMode OFF")
         else:
             gb.system.debug_mode = True
             self.master.title("AutoParameters - Debug Mode")
+            self.status_box.grid()
             print("debugMode ON")
 
     def show_instructions(self):
@@ -420,6 +430,7 @@ class outputView(tk.Frame):
         initialize instruments then activate buttons
         :return:
         """
+        self.status_box.log("Initialize instruments...")
         # call init_test
         testRoutines.init_test()
         # if error, message and exit
@@ -439,10 +450,12 @@ class outputView(tk.Frame):
         setups up for testing by getting goof parts list, parameters, etc
         :return:
         """
+        self.status_box.log("Getting limits...")
         # clears screen
         self.clear_display()
         # gets test limits/parameters
         gb.testLimits = dbase.load_test_limits(self.partno.get())
+        self.status_box.log("Getting good parts list...")
         # gets good part list
         self.partList = dbase.get_good_part_list(gb.testInfo.barNum)
         # print(self.partList)
@@ -496,6 +509,7 @@ class outputView(tk.Frame):
         self.statusLabel.update_idletasks()
 
         # run test with reference to this instance
+        self.status_box.log("Starting test...")
         self.done_event.clear()
         self.test_thread = threading.Thread(target=test_pulse, args=(self.queue, self.done_event, self.check_stop_flag, self.preheatOn), daemon=True)
         self.test_thread.start()
@@ -525,10 +539,11 @@ class outputView(tk.Frame):
     def after_test(self):
 
         #print("after_test")
-
+        self.status_box.log("After test...")
         # todo this is ready to use - not sure  - copied from hipot
         # before saving check test history
         """
+        self.status_box.log("Checking historyt...")
         history = db.check_test_history(self.make_serial_number())
         print (history)
         if history[0] is None or history[0] == 0 or history[0] < 3:
@@ -1006,6 +1021,86 @@ class SetupView(tk.Toplevel):
         # here activate other text box
         self.voltage_ratio_entry.config(state="enabled")
         gb.testInfo.voltageRatio = self.voltage_ratio.get()
+
+class GpibView(tk.Toplevel):
+    """
+    Defines window for for instrument settings and board settings
+    """
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+
+        # Create a new top-level window
+        self.title('GPIB Addressing')
+        self.geometry("400x250+250+300")
+        self.style = ttk.Style()
+        self.style.configure("Normal", bg="white")
+        self.style.configure("Error", bg="red")
+
+        ttk.Label(self, text="Oscilloscope").grid(column=0, row=0, padx=(10,0), sticky="w")
+        ttk.Label(self, text=gb.initValues.scopeMeter).grid(column=1, row=1, padx=(10, 0), sticky="e")
+        ttk.Label(self, text=gb.initValues.scopeAdr).grid(column=2, row=1, padx=(10, 0), sticky="w")
+
+        ttk.Label(self, text="Signal Generator").grid(column=0, row=2, padx=(10,0), sticky="w")
+        ttk.Label(self, text=gb.initValues.sigGen).grid(column=1, row=3, padx=(10, 0), sticky="e")
+        ttk.Label(self, text=gb.initValues.sigGenAdr).grid(column=2, row=3, padx=(10, 0), sticky="w")
+
+        ttk.Label(self, text="Power Supply").grid(column=0, row=4, padx=(10,0), sticky="w")
+        ttk.Label(self, text=gb.initValues.powerUnit).grid(column=1, row=5, padx=(10, 0), sticky="e")
+        ttk.Label(self, text=gb.initValues.powerAdr).grid(column=2, row=5, padx=(10, 0), sticky="w")
+
+        ttk.Label(self, text="Thermo Unit").grid(column=0, row=6, padx=(10,0), sticky="w")
+        ttk.Label(self, text=gb.initValues.thermoUnit).grid(column=1, row=7, padx=(10, 0), sticky="e")
+        ttk.Label(self, text=gb.initValues.thermoAdr).grid(column=2, row=7, padx=(10, 0), sticky="w")
+
+        # Add a button to save settings and close the window
+        ttk.Button(self, text="Close", command=self.destroy).grid(column=2, row=8, padx=10, pady=10, sticky="we")
+
+
+
+class StatusBox(ttk.Frame):
+    def __init__(self, parent, height=3, max_lines=100, **kwargs):
+        super().__init__(parent, **kwargs)
+
+        self.max_lines = max_lines
+
+        # Listbox to show one message per line
+        self.listbox = tk.Listbox(
+            self,
+            height=height,          # visible lines
+            activestyle='none'
+        )
+        self.listbox.grid(row=0, column=0, sticky="nsew")
+
+        # Vertical scrollbar
+        scrollbar = ttk.Scrollbar(
+            self,
+            orient="vertical",
+            command=self.listbox.yview
+        )
+        scrollbar.grid(row=0, column=1, sticky="ns")
+
+        self.listbox.configure(yscrollcommand=scrollbar.set)
+
+        # Make listbox expand inside this frame
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+
+    def log(self, msg: str):
+        """Add a new status message at the TOP (index 0)."""
+        # Insert at top
+        self.listbox.insert(tk.END, msg)
+
+        # Enforce rolling buffer size
+        if self.listbox.size() > self.max_lines:
+            # Delete last (oldest) line
+            self.listbox.delete(0)
+
+        # Scroll to the newest message
+        self.listbox.see(tk.END)
+
+    def clear(self):
+        """Clear all messages."""
+        self.listbox.delete(0, tk.END)
 
 
 
