@@ -281,7 +281,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
     # check part temperature is in range
     # log_temp = float(get_temperature(instr_scan))
     #log_temp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
-    log_temp = gb.thermo.get_measurement(1)
+    log_temp = gb.meter.get_measurement(1)
     while (log_temp < gb.testInfo.minTemp or log_temp > gb.testInfo.maxTemp):
         # display
         # if too cold wait by checking every 2 seconds
@@ -297,7 +297,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
         time.sleep(2)
         # log_temp = get_temperature(instr_scan)
         #log_temp = float(gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T'))
-        log_temp = gb.thermo.get_measurement(1)
+        log_temp = gb.meter.get_measurement(1)
         label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{log_temp:.1f}", 'color': "grey85"}
         update_queue.put(label_update)
 
@@ -321,14 +321,14 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
 
         # monitor temperature until target
         #gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
-        gb.testData.finalTemp = gb.thermo.get_measurement(1)
+        gb.testData.finalTemp = gb.meter.get_measurement(1)
         while gb.testData.finalTemp < gb.testInfo.setTemp:
             # display
             label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{gb.testData.finalTemp:.1f}",
                             'color': "grey85"}
             update_queue.put(label_update)
             #gb.testData.finalTemp = gb.meter.get_meas_temp(gb.testInfo.tempChan, 'T')
-            gb.testData.finalTemp = gb.thermo.get_measurement(1)
+            gb.testData.finalTemp = gb.meter.get_measurement(1)
 
             # check for abort - premature end of test
             if stop_flag_callback():
@@ -452,7 +452,7 @@ def test_pulse(update_queue, done_event, stop_flag_callback, preheat_on):
 
         # get temperature
         #gb.testData.finalTemp = gb.scanner.get_meas_temp(gb.testInfo.tempChan, 'T')
-        gb.testData.finalTemp = gb.thermo.get_measurement(1)
+        gb.testData.finalTemp = gb.meter.get_measurement(1)
         #print(f'max_temp: {gb.testData.finalTemp}')
         # display
         label_update = {'type': 'label', 'label_name': 'finaltemp', 'value': f"{gb.testData.finalTemp:.1f}", 'color': "grey85"}

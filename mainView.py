@@ -217,7 +217,7 @@ class outputView(tk.Frame):
         self.testtime_entry.grid(column=1, row=3, padx=(0, 10), pady=5, sticky="we")
         ttk.Label(readingfrm, text="Test Time (s)").grid(column=1, row=2)
 
-        gb.testData.finalTemp = gb.thermo.get_measurement(1)
+        gb.testData.finalTemp = gb.meter.get_measurement(1)
         print(f'temp: {gb.testData.finalTemp}')
 
         self.finaltemp = tk.StringVar()
@@ -293,7 +293,7 @@ class outputView(tk.Frame):
             self.after(50, self.monitor_thread)  # Continue checking the queue
 
     def check_temp(self):
-        gb.testData.finalTemp = gb.thermo.get_measurement(1)
+        gb.testData.finalTemp = gb.meter.get_measurement(1)
         self.update_label('finaltemp', f"{gb.testData.finalTemp:.1f}", "grey85")
         # check how fast the readings are
         #self.measure_average_time()
@@ -381,7 +381,7 @@ class outputView(tk.Frame):
 
         for i in range(10):
             start_time = time.perf_counter()
-            reading = gb.thermo.get_measurement(1)
+            reading = gb.meter.get_measurement(1)
             elapsed = time.perf_counter() - start_time
 
             readings.append(reading)
@@ -770,25 +770,25 @@ class SetupView(tk.Toplevel):
 
 
 
-        # scanner frame
-        scannerfrm = ttk.LabelFrame(self, text=" Scanner/Meter ", width=175, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
-        scannerfrm.grid(column=3, row=1, columnspan=2, padx=10, pady=10, sticky="nwe")
-        #scannerfrm.columnconfigure(0, weight=1)
+        # meter frame
+        meterfrm = ttk.LabelFrame(self, text=" Meter ", width=175, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
+        meterfrm.grid(column=3, row=1, columnspan=2, padx=10, pady=10, sticky="nwe")
+        #meterfrm.columnconfigure(0, weight=1)
 
-        self.scanner_temp_type = tk.StringVar()
-        self.scanner_temp_type.set(gb.testInfo.tempType)
-        self.scanner_temp_type.trace_add("write", self.on_scanner_temp_type_change)
-        scanner_temp_type_entry = ttk.Entry(scannerfrm, width=7, textvariable=self.scanner_temp_type)
-        scanner_temp_type_entry.grid(column=0, row=0, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(scannerfrm, text="Thermo Type").grid(column=1, row=0, sticky="w")
+        self.meter_temp_type = tk.StringVar()
+        self.meter_temp_type.set(gb.testInfo.tempType)
+        self.meter_temp_type.trace_add("write", self.on_meter_temp_type_change)
+        meter_temp_type_entry = ttk.Entry(meterfrm, width=7, textvariable=self.meter_temp_type)
+        meter_temp_type_entry.grid(column=0, row=0, padx=(0, 10), pady=5, sticky="we")
+        ttk.Label(meterfrm, text="Thermo Type").grid(column=1, row=0, sticky="w")
 
 
-        self.scanner_temp_chan = tk.StringVar()
-        self.scanner_temp_chan.set(gb.testInfo.tempChan)
-        self.scanner_temp_chan.trace_add("write", self.on_scanner_temp_chan_change)
-        scanner_temp_chan_entry = ttk.Entry(scannerfrm, width=7, textvariable=self.scanner_temp_chan)
-        scanner_temp_chan_entry.grid(column=0, row=1, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(scannerfrm, text="Temp Chan").grid(column=1, row=1, sticky="w")
+        self.meter_temp_chan = tk.StringVar()
+        self.meter_temp_chan.set(gb.testInfo.tempChan)
+        self.meter_temp_chan.trace_add("write", self.on_meter_temp_chan_change)
+        meter_temp_chan_entry = ttk.Entry(meterfrm, width=7, textvariable=self.meter_temp_chan)
+        meter_temp_chan_entry.grid(column=0, row=1, padx=(0, 10), pady=5, sticky="we")
+        ttk.Label(meterfrm, text="Temp Chan").grid(column=1, row=1, sticky="w")
 
 
         # scope frame
@@ -882,30 +882,71 @@ class SetupView(tk.Toplevel):
         self.voltage_ratio_entry.config(state="disabled")
         ttk.Label(voltagefrm, text="V/1V").grid(column=1, row=4, sticky="w")
 
-        # current probe frame
-        self.current_option = tk.StringVar(value='1.5 A (0.604R)')
-        self.current_scale = tk.StringVar()
-        self.current_scale.set(gb.testInfo.currentRatio)
+        # --- Current Probe Selection Frame ---
+        # Map of label → mV/A scale
         self.option_map = {
             '1.5 A (0.604R)': 597,
             '2.4 A (0.374R)': 371,
-            '2.7 A (0.332R)': 330,   # was 328 but calc'd value is 330
+            '2.7 A (0.332R)': 330,  # was 328 but calc'd value is 330
             'Other': None
         }
-        currentfrm = ttk.LabelFrame(self, text=" Current Measurement ", width=200, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
-        currentfrm.grid(column=3, row=2, columnspan=2, padx=10, pady=10, sticky="nwe")
-        #currentfrm.columnconfigure(0, weight=1)
 
+        # Restore previous selection or default
+        saved_label = getattr(gb.testInfo, "currentProbe", "2.7 A (0.332R)")
+        if saved_label not in self.option_map:
+            saved_label = "2.7 A (0.332R)"  # safety fallback
+
+        self.current_option = tk.StringVar(value=saved_label)
+
+        # Restore previous ratio; if not set and not "Other", use map
+        saved_ratio = getattr(gb.testInfo, "currentRatio", None)
+        if saved_ratio is None and saved_label != "Other":
+            saved_ratio = self.option_map[saved_label]
+            gb.testInfo.currentRatio = saved_ratio  # keep in sync
+
+        currentfrm = ttk.LabelFrame(
+            self,
+            text=" Current Measurement ",
+            width=200,
+            height=200,
+            relief='raised',
+            borderwidth=20,
+            padding="10 10 10 10"
+        )
+        currentfrm.grid(column=3, row=2, columnspan=2, padx=10, pady=10, sticky="nwe")
+
+        # --- Radio Buttons ---
         for i, label in enumerate(self.option_map.keys()):
-            ttk.Radiobutton(currentfrm, text=label, value=label, variable=self.current_option, command=self.on_current_selection
+            ttk.Radiobutton(
+                currentfrm,
+                text=label,
+                value=label,
+                variable=self.current_option,
+                command=self.on_current_selection
             ).grid(row=i, column=0, sticky="w", padx=10, pady=2)
 
+        # --- Scale Entry Box ---
         self.current_scale_entry = ttk.Entry(currentfrm, width=7)
         self.current_scale_entry.grid(column=0, row=5, padx=(0, 10), pady=5, sticky="we")
-        self.current_scale_entry.insert(0, str(self.option_map['2.7 A (0.332R)']))
-        self.current_scale_entry.config(state="disabled")
-        ttk.Label(currentfrm, text="mV/A").grid(column=1, row=5, sticky="w")
 
+        # Bind to save custom value when user edits it
+        self.current_scale_entry.bind("<FocusOut>", self.on_current_scale_change)
+        self.current_scale_entry.bind("<Return>", self.on_current_scale_change)
+
+        # Initialize entry contents / state
+        self.current_scale_entry.delete(0, tk.END)
+        if saved_label == "Other":
+            self.current_scale_entry.config(state="normal")
+            if saved_ratio is not None:
+                self.current_scale_entry.insert(0, str(saved_ratio))
+            else:
+                self.current_scale_entry.insert(0, "")
+        else:
+            self.current_scale_entry.config(state="normal")
+            self.current_scale_entry.insert(0, str(saved_ratio))
+            self.current_scale_entry.config(state="disabled")
+
+        ttk.Label(currentfrm, text="mV/A").grid(column=1, row=5, sticky="w")
 
         # Add a button to save settings and close the window
         ttk.Button(self, text="Close", command=self.destroy).grid(column=5, row=3, padx=10, pady=10, sticky="we")
@@ -935,17 +976,17 @@ class SetupView(tk.Toplevel):
     def on_pulse_gen_units_change(self, *args):
         gb.testInfo.pulseUnits = self.pulse_gen_units.get()
 
-    def on_scanner_temp_type_change(self, *args):
-        gb.testInfo.tempType = self.scanner_temp_type.get()
+    def on_meter_temp_type_change(self, *args):
+        gb.testInfo.tempType = self.meter_temp_type.get()
 
-    def on_scanner_temp_chan_change(self, *args):
-        gb.testInfo.tempChan = self.scanner_temp_chan.get()
+    def on_meter_temp_chan_change(self, *args):
+        gb.testInfo.tempChan = self.meter_temp_chan.get()
 
-    def on_scanner_vin_chan_change(self, *args):
-        gb.testInfo.vinChan = self.scanner_vin_chan.get()
+    def on_meter_vin_chan_change(self, *args):
+        gb.testInfo.vinChan = self.meter_vin_chan.get()
 
-    def on_scanner_vout_chan_change(self, *args):
-        gb.testInfo.voutChan = self.scanner_vout_chan.get()
+    def on_meter_vout_chan_change(self, *args):
+        gb.testInfo.voutChan = self.meter_vout_chan.get()
 
     def on_scope_vdss_chan_change(self, *args):
         gb.testInfo.vdssChan = self.scope_vdss_chan.get()
@@ -978,20 +1019,66 @@ class SetupView(tk.Toplevel):
         gb.testInfo.iaux = self.power_current.get()
 
     def on_current_selection(self):
-        selected_label = self.current_option.get()
+        label = self.current_option.get()
 
-        if selected_label == "Other":
-            self.current_scale_entry.config(state="normal")
+        # Save label
+        gb.testInfo.currentProbe = label
+
+        scale_value = self.option_map[label]
+
+        # For fixed options, save ratio from map
+        if scale_value is not None:
+            gb.testInfo.currentRatio = scale_value
+
+        # Update entry box state/content
+        self.current_scale_entry.config(state="normal")
+        self.current_scale_entry.delete(0, tk.END)
+
+        if label == "Other":
+            # Let user type a custom value; use existing one if any
+            existing = getattr(gb.testInfo, "currentRatio", None)
+            if existing is not None:
+                self.current_scale_entry.insert(0, str(existing))
+            else:
+                self.current_scale_entry.insert(0, "")
+            # keep it editable
         else:
-            # Get corresponding value from the map
-            value = self.option_map[selected_label]
-            self.current_scale_entry.config(state="normal")  # enable to insert
+            # Fixed scale from map, read-only
+            self.current_scale_entry.insert(0, str(scale_value))
+            self.current_scale_entry.config(state="disabled")
+
+    def on_current_scale_change(self, event=None):
+        """
+        Called when the user leaves the entry field or presses Enter.
+        Saves custom mV/A into gb.testInfo.currentRatio when 'Other' is selected.
+        """
+        # Only care when "Other" is selected
+        if self.current_option.get() != "Other":
+            return
+
+        text = self.current_scale_entry.get().strip()
+
+        if not text:
+            # Empty → treat as no custom value
+            gb.testInfo.currentRatio = None
+            return
+
+        try:
+            # Use float or int, your choice:
+            value = float(text)
+        except ValueError:
+            # Invalid input → revert to previous good value (if any)
+            prev = getattr(gb.testInfo, "currentRatio", None)
             self.current_scale_entry.delete(0, tk.END)
-            self.current_scale_entry.insert(0, str(value))
-            self.current_scale_entry.config(state="readonly")  # prevent edits for fixed values
-        gb.testInfo.currentRatio = self.current_scale_entry.get()
-        gb.testInfo.currentProbe = self.current_option.get()
-        print(f'currentRatio: {gb.testInfo.currentRatio}')
+            if prev is not None:
+                self.current_scale_entry.insert(0, str(prev))
+            else:
+                # leave blank if no previous value
+                pass
+            return
+
+        # Save valid custom value
+        gb.testInfo.currentRatio = value
 
     def current_option(self):
         # here update current ratio test box but leave gray
@@ -1048,9 +1135,9 @@ class GpibView(tk.Toplevel):
         ttk.Label(self, text=gb.initValues.powerUnit).grid(column=1, row=5, padx=(10, 0), sticky="e")
         ttk.Label(self, text=gb.initValues.powerAdr).grid(column=2, row=5, padx=(10, 0), sticky="w")
 
-        ttk.Label(self, text="Thermo Unit").grid(column=0, row=6, padx=(10,0), sticky="w")
-        ttk.Label(self, text=gb.initValues.thermoUnit).grid(column=1, row=7, padx=(10, 0), sticky="e")
-        ttk.Label(self, text=gb.initValues.thermoAdr).grid(column=2, row=7, padx=(10, 0), sticky="w")
+        ttk.Label(self, text="Meter Unit").grid(column=0, row=6, padx=(10,0), sticky="w")
+        ttk.Label(self, text=gb.initValues.meterUnit).grid(column=1, row=7, padx=(10, 0), sticky="e")
+        ttk.Label(self, text=gb.initValues.meterAdr).grid(column=2, row=7, padx=(10, 0), sticky="w")
 
         # Add a button to save settings and close the window
         ttk.Button(self, text="Close", command=self.destroy).grid(column=2, row=8, padx=10, pady=10, sticky="we")

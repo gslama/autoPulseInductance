@@ -36,9 +36,8 @@ powerAdr = TCPIP0::192.168.88.10::inst0::INSTR
 scannerUnit = HP34970A
 scannerAdr = GPIB1::10::INSTR
 
-meterUnit = HP34401A
-meterAdr = GPIB1::03::INSTR
+meterUnit = USB2001TC
+meterAdr = 1
 
-thermoUnit = USB2001TC
-thermoAdr = 1
-boardNum = 0
+dioUnit = USB1208LS
+dioAdr = 0

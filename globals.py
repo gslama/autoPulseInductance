@@ -67,11 +67,9 @@ class CLinitValues(object):
     powerAdr: str = ""
     scannerUnit: str = "HP34970A"
     scannerAdr: str = ""
-    meterUnit: str = ""
-    meterAdr: str = ""
-    thermoUnit: str = "USB2001TC"
-    thermoAdr: int = 1
-    boardNum: int = 0
+    meterUnit: str = "USB2001TC"
+    meterAdr: str = "1"
+    dioUnit: str = ""
     dioAdr: int = 0
     commPort: int = 4
     lcrXfmrLevel: float = 0.5
@@ -168,8 +166,8 @@ class CLtestInfo(object):
     currentScale: str = "0.50"
     voutChan: str = "4"
     voutScale = "0.5"
-    currentRatio = 597
-    currentProbe: str = "1.5 A (0.604R)"
+    currentRatio = 330
+    currentProbe: str = "2.7 A (0.332R)"
     voltageRatio = 562.8
     pulsePeriod = 20
     pulseWidth = None

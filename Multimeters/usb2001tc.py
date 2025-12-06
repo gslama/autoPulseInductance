@@ -1,6 +1,6 @@
 
 import re
-from Thermometers.thermometer_base import Thermometer
+from Multimeters.meter_base import Meter
 from tkinter import messagebox
 
 from mcculw import ul
@@ -15,7 +15,7 @@ import time
 import globals as gb
 
 
-class USB2001TC(Thermometer):
+class USB2001TC(Meter):
     """
     This device uses a USB interface
     The device uses 'Instcal' to setup a board num and the thermocouple type.
