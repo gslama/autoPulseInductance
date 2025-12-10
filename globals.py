@@ -158,8 +158,8 @@ class CLtestInfo(object):
     fixture: str = None
     tempType: str = "T"
     tempChan: str = "105"
-    vinChan: str = "110"
-    voutChan: str = "107"
+    #vinChan: str = "110"
+    #voutChan: str = "107"
     vdssChan: str = "2"
     vdssScale: str = "100"
     currentChan: str = "3"
@@ -168,6 +168,7 @@ class CLtestInfo(object):
     voutScale = "0.5"
     currentRatio = 330
     currentProbe: str = "2.7 A (0.332R)"
+    voltageDivider = "1200V (178k)"
     voltageRatio = 562.8
     pulsePeriod = 20
     pulseWidth = None
@@ -182,10 +183,14 @@ class CLtestInfo(object):
     testInterval = 3
     testCurrent = 1.5
     lpulseCurrent = 1.5
+    ch1Voltage = 15
+    ch1CurrentLimit = 2
+    ch2Voltage = 5.3
+    ch2CurrentLimit = 1
     vin = 15
     currentLimit = 2
-    vaux = 5.3
-    iaux = 1
+    vAux = 5.3
+    iAux = 1
     setTemp = 85
     setTempRange = 1
     preheat = False

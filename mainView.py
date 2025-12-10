@@ -9,9 +9,9 @@ import tkinter as tk
 from tkinter import ttk, messagebox, font
 from tkinter.filedialog import askopenfilename, asksaveasfilename, askdirectory
 from datetime import datetime
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.pyplot as plt
+#from matplotlib.figure import Figure
+#from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+#import matplotlib.pyplot as plt
 import threading
 import queue
 import time
@@ -41,7 +41,6 @@ class MainWindow(tk.Frame):
         Frame.__init__(self)
         # self.master = master
         self.init_window()
-
 
 
 class outputView(tk.Frame):
@@ -817,69 +816,124 @@ class SetupView(tk.Toplevel):
         powerfrm.grid(column=5, row=2, columnspan=2, padx=10, pady=10, sticky="nwe")
         #scopefrm.columnconfigure(0, weight=3)
 
-        self.power_voltage = tk.StringVar()
-        self.power_voltage.set(gb.testInfo.vin)
-        self.power_voltage.trace_add("write", self.on_power_voltage_change)
-        power_voltage_entry = ttk.Entry(powerfrm, width=7, textvariable=self.power_voltage)
+        self.ch1_voltage = tk.StringVar()
+        self.ch1_voltage.set(gb.testInfo.vin)
+        self.ch1_voltage.trace_add("write", self.on_ch1_voltage_change)
+        power_voltage_entry = ttk.Entry(powerfrm, width=7, textvariable=self.ch1_voltage)
         power_voltage_entry.grid(column=0, row=0, padx=(0, 10), pady=5, sticky="we")
         ttk.Label(powerfrm, text="CH1 Voltage").grid(column=1, row=0, sticky="w")
 
-        self.power_current = tk.StringVar()
-        self.power_current.set(gb.testInfo.currentLimit)
-        self.power_current.trace_add("write", self.on_power_current_change)
-        power_current_entry = ttk.Entry(powerfrm, width=7, textvariable=self.power_current)
+        self.ch1_current = tk.StringVar()
+        self.ch1_current.set(gb.testInfo.currentLimit)
+        self.ch1_current.trace_add("write", self.on_ch1_current_change)
+        power_current_entry = ttk.Entry(powerfrm, width=7, textvariable=self.ch1_current)
         power_current_entry.grid(column=0, row=1, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(powerfrm, text="CH1 Current").grid(column=1, row=1, sticky="w")
+        ttk.Label(powerfrm, text="CH1 Current Limit").grid(column=1, row=1, sticky="w")
 
-        self.power_voltage_2 = tk.StringVar()
-        self.power_voltage_2.set(gb.testInfo.vaux)
-        self.power_voltage_2.trace_add("write", self.on_power_voltage_2_change)
-        power_voltage_entry_2 = ttk.Entry(powerfrm, width=7, textvariable=self.power_voltage_2)
+        self.ch2_voltage = tk.StringVar()
+        self.ch2_voltage.set(gb.testInfo.vAux)
+        self.ch2_voltage.trace_add("write", self.on_ch2_voltage_change)
+        power_voltage_entry_2 = ttk.Entry(powerfrm, width=7, textvariable=self.ch2_voltage)
         power_voltage_entry_2.grid(column=0, row=2, padx=(0, 10), pady=5, sticky="we")
         ttk.Label(powerfrm, text="CH2 Voltage").grid(column=1, row=2, sticky="w")
 
-        self.power_current_2 = tk.StringVar()
-        self.power_current_2.set(gb.testInfo.iaux)
-        self.power_current_2.trace_add("write", self.on_power_current_2_change)
-        power_current_entry_2 = ttk.Entry(powerfrm, width=7, textvariable=self.power_current_2)
+        self.ch2_current = tk.StringVar()
+        self.ch2_current.set(gb.testInfo.iAux)
+        self.ch2_current.trace_add("write", self.on_ch2_current_change)
+        power_current_entry_2 = ttk.Entry(powerfrm, width=7, textvariable=self.ch2_current)
         power_current_entry_2.grid(column=0, row=3, padx=(0, 10), pady=5, sticky="we")
-        ttk.Label(powerfrm, text="CH2 Current").grid(column=1, row=3, sticky="w")
+        ttk.Label(powerfrm, text="CH2 Current Limit").grid(column=1, row=3, sticky="w")
 
+        # --- Voltage Divider Ratio Frame ---
 
-        # voltage divider ratio frame
-        self.voltage_option = tk.StringVar()
-        self.voltage_option.set('1200V')
-        self.voltage_ratio = tk.StringVar()
-        self.voltage_ratio.set(gb.testInfo.voltageRatio)
-
-        voltagefrm = ttk.LabelFrame(self, text=" Voltage Divider Ratio ", width=200, height=200, relief='raised', borderwidth=20, padding="10 10 10 10")
-        voltagefrm.grid(column=0, row=2, columnspan=2, padx=10, pady=10, sticky="nwe")
-        #voltagefrm.columnconfigure(0, weight=1)
-
-        ttk.Radiobutton(voltagefrm, text='1200 V (178 k)', variable=self.voltage_option, value='1200V',
-                        command=self.voltage_ratio).grid(column=0, row=0, padx=20, sticky=tk.W)
-
-        ttk.Radiobutton(voltagefrm, text='1400 V (150 k)', variable=self.voltage_option, value='1400V',
-                        command=self.voltage_ratio).grid(column=0, row=1, padx=20, sticky=tk.W)
-
-        ttk.Radiobutton(voltagefrm, text='2000 V (249 k)', variable=self.voltage_option, value='2000V',
-                        command=self.voltage_ratio).grid(column=0, row=2, padx=20, sticky=tk.W)
-
-        ttk.Radiobutton(voltagefrm, text='Other', variable=self.voltage_option, value='Other',
-                        command=self.voltage_other).grid(column=0, row=3, padx=20, sticky=tk.W)
-
+        # Map of option → numeric ratio (V/1V)
         self.voltage_option_map = {
-            '1200 V (178 k)': '1200V',
-            '1400 V (150 k)': '1400V',
-            '2000 V (249 k)': '2000V',
-            'Other': 'Other'
+            '1200V': 562.8,
+            '1400V': 667.7,
+            '2000V': 827.8,
+            'Other': None,
         }
 
+        # Restore previous selection or default to 1200V
+        saved_option = getattr(gb.testInfo, "voltageDivider", "1200V")
+        if saved_option not in self.voltage_option_map:
+            saved_option = "1200V"
+
+        self.voltage_option = tk.StringVar(value=saved_option)
+
+        # Restore previous ratio; if not set and not "Other", use map
+        saved_ratio = getattr(gb.testInfo, "voltageRatio", None)
+        if saved_ratio is None and saved_option != "Other":
+            saved_ratio = self.voltage_option_map[saved_option]
+            gb.testInfo.voltageRatio = saved_ratio  # keep in sync
+
+        voltagefrm = ttk.LabelFrame(
+            self,
+            text=" Voltage Divider Ratio ",
+            width=200,
+            height=200,
+            relief='raised',
+            borderwidth=20,
+            padding="10 10 10 10"
+        )
+        voltagefrm.grid(column=0, row=2, columnspan=2, padx=10, pady=10, sticky="nwe")
+
+        # --- Radio Buttons ---
+        ttk.Radiobutton(
+            voltagefrm,
+            text='1200V (178k)',
+            variable=self.voltage_option,
+            value='1200V',
+            command=self.on_voltage_selection,
+        ).grid(column=0, row=0, padx=20, sticky=tk.W)
+
+        ttk.Radiobutton(
+            voltagefrm,
+            text='1400V (150k)',
+            variable=self.voltage_option,
+            value='1400V',
+            command=self.on_voltage_selection,
+        ).grid(column=0, row=1, padx=20, sticky=tk.W)
+
+        ttk.Radiobutton(
+            voltagefrm,
+            text='2000V (249k)',
+            variable=self.voltage_option,
+            value='2000V',
+            command=self.on_voltage_selection,
+        ).grid(column=0, row=2, padx=20, sticky=tk.W)
+
+        ttk.Radiobutton(
+            voltagefrm,
+            text='Other',
+            variable=self.voltage_option,
+            value='Other',
+            command=self.on_voltage_selection,
+        ).grid(column=0, row=3, padx=20, sticky=tk.W)
+
+        # --- Ratio Entry ---
         self.voltage_ratio = tk.StringVar()
-        self.voltage_ratio.set(gb.testInfo.voltageRatio)
         self.voltage_ratio_entry = ttk.Entry(voltagefrm, width=7, textvariable=self.voltage_ratio)
         self.voltage_ratio_entry.grid(column=0, row=4, padx=(0, 10), pady=5, sticky="we")
-        self.voltage_ratio_entry.config(state="disabled")
+
+        # Save custom ratio when user edits it
+        self.voltage_ratio_entry.bind("<FocusOut>", self.on_voltage_ratio_change)
+        self.voltage_ratio_entry.bind("<Return>", self.on_voltage_ratio_change)
+
+        # Initialize entry contents / state
+        self.voltage_ratio_entry.config(state="normal")
+        self.voltage_ratio_entry.delete(0, tk.END)
+
+        if saved_option == "Other":
+            if saved_ratio is not None:
+                self.voltage_ratio.set(str(saved_ratio))
+            else:
+                self.voltage_ratio.set("")
+            # leave editable
+        else:
+            self.voltage_ratio.set(str(saved_ratio))
+            self.voltage_ratio_entry.config(state="disabled")
+
         ttk.Label(voltagefrm, text="V/1V").grid(column=1, row=4, sticky="w")
 
         # --- Current Probe Selection Frame ---
@@ -1006,17 +1060,17 @@ class SetupView(tk.Toplevel):
     def on_scope_vout_scale_change(self, *args):
         gb.testInfo.voutScale = self.scope_vout_scale.get()
 
-    def on_power_voltage_change(self, *args):
-        gb.testInfo.vin = self.power_voltage.get()
+    def on_ch1_voltage_change(self, *args):
+        gb.testInfo.vin = self.ch1_voltage.get()
 
-    def on_power_current_change(self, *args):
-        gb.testInfo.currentLimit = self.power_current.get()
+    def on_ch1_current_change(self, *args):
+        gb.testInfo.currentLimit = self.ch1_current.get()
 
-    def on_power_voltage_2_change(self, *args):
-        gb.testInfo.vaux = self.power_voltage.get()
+    def on_ch2_voltage_change(self, *args):
+        gb.testInfo.vaux = self.ch2_voltage.get()
 
-    def on_power_current_2_change(self, *args):
-        gb.testInfo.iaux = self.power_current.get()
+    def on_ch2_current_change(self, *args):
+        gb.testInfo.iaux = self.ch2_current.get()
 
     def on_current_selection(self):
         label = self.current_option.get()
@@ -1108,6 +1162,60 @@ class SetupView(tk.Toplevel):
         # here activate other text box
         self.voltage_ratio_entry.config(state="enabled")
         gb.testInfo.voltageRatio = self.voltage_ratio.get()
+
+    def on_voltage_selection(self):
+        option = self.voltage_option.get()
+
+        # Save selected option
+        gb.testInfo.voltageDivider = option
+
+        ratio = self.voltage_option_map[option]
+
+        self.voltage_ratio_entry.config(state="normal")
+        self.voltage_ratio_entry.delete(0, tk.END)
+
+        if option == "Other":
+            # Allow custom value; pre-fill with any previously saved custom ratio
+            existing = getattr(gb.testInfo, "voltageRatio", None)
+            if existing is not None:
+                self.voltage_ratio.set(str(existing))
+            else:
+                self.voltage_ratio.set("")
+            # leave entry editable
+        else:
+            # Fixed ratio from map
+            gb.testInfo.voltageRatio = ratio
+            self.voltage_ratio.set(str(ratio))
+            self.voltage_ratio_entry.config(state="disabled")
+
+    def on_voltage_ratio_change(self, event=None):
+        """
+        Called when the user leaves the voltage ratio entry or presses Enter.
+        Saves custom ratio into gb.testInfo.voltageRatio when 'Other' is selected.
+        """
+        if self.voltage_option.get() != "Other":
+            return
+
+        text = self.voltage_ratio.get().strip()
+
+        if not text:
+            gb.testInfo.voltageRatio = None
+            return
+
+        try:
+            value = float(text)
+        except ValueError:
+            # Revert to previous good value if parse fails
+            prev = getattr(gb.testInfo, "voltageRatio", None)
+            self.voltage_ratio_entry.delete(0, tk.END)
+            if prev is not None:
+                self.voltage_ratio.set(str(prev))
+            else:
+                self.voltage_ratio.set("")
+            return
+
+        gb.testInfo.voltageRatio = value
+
 
 class GpibView(tk.Toplevel):
     """
