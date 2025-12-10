@@ -29,7 +29,7 @@ class SDS824XHD(Scope):
         try:
             self.visa_session = rm.open_resource(port)
             self.visa_session.timeout = 1000
-            self.visa_session.read_termination = '\r\n'
+            self.visa_session.read_termination = '\n'
             self.visa_session.write_termination = '\n'
             # try sending query
             self.visa_session.query('*IDN?')
