@@ -2,7 +2,6 @@
 models.py
     Database access and data helpers for bar/part testing.
 
-    Combined and cleaned up from previous Models-* variants.
 """
 
 from __future__ import annotations
@@ -16,11 +15,7 @@ from typing import Any, List, Optional, Sequence, Tuple
 import pyodbc
 from tkinter import messagebox
 
-# Allow either naming convention for your globals module.
-try:
-    import Globals as gb  # type: ignore
-except ImportError:  # pragma: no cover
-    import globals as gb  # type: ignore
+import globals as gb
 
 
 # ---------------------------------------------------------------------------
@@ -502,7 +497,7 @@ class Database:
         with open(file_name, "w", newline="") as f:
             writer = csv.writer(f)
 
-            writer.writerow([f"Parameter Test v{gb.initValues.version}"])
+            writer.writerow([f"Parameter Test v{gb.system.version}"])
             writer.writerow(["Date", today])
             writer.writerow(["Bar", gb.testInfo.barNum])
             writer.writerow(["Design", gb.testInfo.designNum])

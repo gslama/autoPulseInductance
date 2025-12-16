@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9cec9493-59ae-42fd-8ba3-96c44ce46bf0" name="Changes" comment="-9/12/25&#10;-commit first release">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainView.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainView.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestRoutines.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestRoutines.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Thermometers/usb2001tc.py" beforeDir="false" afterPath="$PROJECT_DIR$/Thermometers/usb2001tc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/autoPulse.py" beforeDir="false" afterPath="$PROJECT_DIR$/autoPulse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/globals.py" beforeDir="false" afterPath="$PROJECT_DIR$/globals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
-    </list>
+    <list default="true" id="9cec9493-59ae-42fd-8ba3-96c44ce46bf0" name="Changes" comment="-9/12/25&#10;-commit first release" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,30 +49,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.MainView.executor": "Debug",
-    "Python.Models.executor": "Debug",
-    "Python.TestRoutines.executor": "Debug",
-    "Python.__init__.executor": "Run",
-    "Python.autoOutput.executor": "Debug",
-    "Python.autoPulse.executor": "Debug",
-    "Python.excel_test.executor": "Debug",
-    "Python.main.executor": "Debug",
-    "Python.models.executor": "Debug",
-    "Python.sdm3055sc.executor": "Debug",
-    "Python.sds824xhd.executor": "Debug",
-    "Python.signal_gen_base.executor": "Debug",
-    "Python.testplot.executor": "Debug",
-    "Python.testplot2.executor": "Debug",
-    "Python.testplot3.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/gslam/Dropbox/SlamaTech/Consulting/AUTO Programs Python/AutoOutput/Source/autoOutput/.venv/Scripts/python.exe",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.MainView.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.Models.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.TestRoutines.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
+    &quot;Python.autoOutput.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.autoPulse.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.excel_test.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.models.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.sdm3055sc.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.sds824xhd.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.signal_gen_base.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.testplot.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.testplot2.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.testplot3.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/gslam/Dropbox/SlamaTech/Consulting/AUTO Programs Python/AutoOutput/Source/autoOutput/.venv/Scripts/python.exe&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\gslam\Dropbox\SlamaTech\Consulting\AUTO Programs Python\AutoPulseInductance\Source\Thermometers" />

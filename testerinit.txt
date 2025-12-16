@@ -1,7 +1,8 @@
 # testerInit.txt
 # will overwrite any duplicate key values from common init
 
+# path to main init file
 commonInitFile = commonInit.txt
-debugMode = 0
+
 ipeakLo = 0.95
 ipeakHi = 1.2

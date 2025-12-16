@@ -5,7 +5,8 @@ Home for global variables
 
 import array as arr
 from enum import Enum
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field
+from typing import Optional
 from tkinter import messagebox
 import os
 
@@ -24,9 +25,9 @@ class CLsystem(object):
     system information
     '''
     # internal system variables, mostly status
-    version: str = "1.0.0"
-    debug_mode = True
-    calibrated = False
+    version: str = "1.1.0"
+    debug_mode: bool = Flase
+    calibrated: bool = False
     fixture: str = ""
 
 # declare instance
@@ -70,7 +71,7 @@ class CLinitValues(object):
     meterUnit: str = "USB2001TC"
     meterAdr: str = "1"
     dioUnit: str = ""
-    dioAdr: int = 0
+    dioAdr: str = ""
     commPort: int = 4
     lcrXfmrLevel: float = 0.5
     lcrIndLevel: float = 0.1
@@ -80,7 +81,6 @@ class CLinitValues(object):
     ipeakLo: float = 0.95
     ipeakHi: float = 1.1
     debugLcr: int = 1
-    debugMode: int = 0
     test: str = ""
 
 # function to load from files
@@ -169,31 +169,31 @@ class CLtestInfo(object):
     currentRatio = 330
     currentProbe: str = "2.7 A (0.332R)"
     voltageDivider = "1200V (178k)"
-    voltageRatio = 562.8
-    pulsePeriod = 20
-    pulseWidth = None
-    pulseStart = 1
-    pulseStop = 7
-    pulseStep = 0.5
+    voltageRatio: float = 562.8
+    pulsePeriod: float = 20
+    pulseWidth: float = 0
+    pulseStart:float = 1
+    pulseStop: float = 7
+    pulseStep: float = 0.5
     pulseUnits: str = "us"
-    thresholdCurrent = 2.5
-    thresholdVoltage = 2000
-    minTemp = 18
-    maxTemp = 30
-    testInterval = 3
-    testCurrent = 1.5
-    lpulseCurrent = 1.5
-    ch1Voltage = 15
-    ch1CurrentLimit = 2
-    ch2Voltage = 5.3
-    ch2CurrentLimit = 1
-    vin = 15
-    currentLimit = 2
-    vAux = 5.3
-    iAux = 1
-    setTemp = 85
-    setTempRange = 1
-    preheat = False
+    thresholdCurrent: float = 2.5
+    thresholdVoltage: float = 2000
+    minTemp: float = 18
+    maxTemp: float = 30
+    testInterval: float = 3
+    testCurrent: float = 1.5
+    lpulseCurrent: float = 1.5
+    ch1Voltage: float = 15
+    ch1CurrentLimit: float = 2
+    ch2Voltage: float = 5.3
+    ch2CurrentLimit: float = 1
+    vin: float = 15
+    currentLimit: float = 2
+    vaux: float = 5.3
+    iaux: float = 1
+    setTemp: float = 85
+    setTempRange: float = 1
+    preheat: bool = False
 
 # declare instance
 testInfo = CLtestInfo()
@@ -205,37 +205,37 @@ class CLtestData:
     measured test results
     status codes ennum below
     '''
-    status = 0
-    priInd = None
-    secInd = None
-    priLkg = None
-    priQ = None
-    priRes = None
-    secRes = None
-    coupling = None
-    irVoltage = None
-    irResistance = None
-    irTime = None
-    hipotVoltage = None
-    hipotCurrent = None
-    hipotTime = None
-    indInd = []
-    indQ = []
-    indBias = []
-    indRes = None
-    indSetBias = None
-    vin = None
-    ipk = None
-    vout = None
-    voutlp = None
-    pulseWidth = None
-    lpulse = None
-    lpulseSpecific = None
-    finalTemp = None
-    tempDiff = None
-    vdss = None
-    testTime = None
-    logTime = None
+    status: Optional[int] = 0
+    priInd: Optional[float] = None
+    secInd: Optional[float] = None
+    priLkg: Optional[float] = None
+    priQ: Optional[float] = None
+    priRes: Optional[float] = None
+    secRes: Optional[float] = None
+    coupling: Optional[float] = None
+    irVoltage: Optional[float] = None
+    irResistance: Optional[float] = None
+    irTime: Optional[float] = None
+    hipotVoltage: Optional[float] = None
+    hipotCurrent: Optional[float] = None
+    hipotTime: Optional[float] = None
+    indInd: list[float] = field(default_factory=list)
+    indQ: list[float] = field(default_factory=list)
+    indBias: list[float] = field(default_factory=list)
+    indRes: Optional[float] = None
+    indSetBias: Optional[float] = None
+    vin: Optional[float] = None
+    ipk: Optional[float] = None
+    vout: Optional[float] = None
+    voutlp: Optional[float] = None
+    pulseWidth: Optional[float] = None
+    lpulse: Optional[float] = None
+    lpulseSpecific: Optional[float] = None
+    finalTemp: Optional[float] = None
+    tempDiff: Optional[float] = None
+    vdss: Optional[float] = None
+    testTime: Optional[float] = None
+    logTime: Optional[str] = None
 
     def appendInd(self, value):
         self.indInd.append(value)
@@ -255,49 +255,49 @@ class CLtestLimits(object):
     '''
     test limits retrieved from database
     '''
-    partNum = None       # was Part_Num
-    designNum = None     # was Design_Num
-    numPositions = None  # was Num_Positions
-    numTerms = None
-    numVariants = None
-    prefireFixture = None
-    fixtureNum = None    # was Fixture
-    testType = None
-    priLmin = None
-    priLmax = None
-    priQmin = None
-    priRmin = None
-    priRmax = None
-    leakageMin = None
-    leakageMax = None
-    coupling = None
-    secLmin = None
-    secLmax = None
-    secRmin = None
-    secRmax = None
-    pulseLmin = None     # was LPulsemin
-    pulseLmax = None     # was LPulsemax
-    outputVoltmin = None    # was Voutmin
-    pulseLcur = None     # was IPulse
-    hipotVoltage = None  # was VHipot
-    hipotRamp = None
-    hipotCur = None      # was IHipot
-    hipotTime = None     # was THipot
-    irVoltage = None
-    irResistance = None
-    irTime = None
-    stxPercentChange = None  # was STX%change
-    outputVoltmin85 = None   # was Voutmin85
-    pulseLmin85 = None       # was LPulsemin85
-    outputGraphline = None
-    startPulseWidth = None   # was StartingPulseWidth
-    turnsRatio = None
-    lcrlevel = None
-    indL100min = None
-    indL100max = None
-    satCur = None
-    satLminPercent = None    # Lsatmin%
-    hipotType = None
+    partNum: Optional[str] = None       # was Part_Num
+    designNum: Optional[str] = None     # was Design_Num
+    numPositions: Optional[int] = None  # was Num_Positions
+    numTerms: Optional[int] = None
+    numVariants: Optional[int] = None
+    prefireFixture: Optional[str] = None
+    fixtureNum: Optional[str] = None    # was Fixture
+    testType: Optional[str] = None
+    priLmin: Optional[float] = None
+    priLmax: Optional[float] = None
+    priQmin: Optional[float] = None
+    priRmin: Optional[float] = None
+    priRmax: Optional[float] = None
+    leakageMin: Optional[float] = None
+    leakageMax: Optional[float] = None
+    coupling: Optional[float] = None
+    secLmin: Optional[float] = None
+    secLmax: Optional[float] = None
+    secRmin: Optional[float] = None
+    secRmax: Optional[float] = None
+    pulseLmin: Optional[float] = None     # was LPulsemin
+    pulseLmax: Optional[float] = None     # was LPulsemax
+    outputVoltmin: Optional[float] = None    # was Voutmin
+    pulseLcur: Optional[float] = None     # was IPulse
+    hipotVoltage: Optional[float] = None  # was VHipot
+    hipotRamp: Optional[float] = None
+    hipotCur: Optional[float] = None      # was IHipot
+    hipotTime: Optional[float] = None     # was THipot
+    irVoltage: Optional[float] = None
+    irResistance: Optional[float] = None
+    irTime: Optional[float] = None
+    stxPercentChange: Optional[float] = None  # was STX%change
+    outputVoltmin85: Optional[float] = None   # was Voutmin85
+    pulseLmin85: Optional[float] = None       # was LPulsemin85
+    outputGraphline: Optional[str] = None
+    startPulseWidth: Optional[float] = None   # was StartingPulseWidth
+    turnsRatio: Optional[float] = None
+    lcrlevel: Optional[float] = None
+    indL100min: Optional[float] = None
+    indL100max: Optional[float] = None
+    satCur: Optional[float] = None
+    satLminPercent: Optional[float] = None    # Lsatmin%
+    hipotType: Optional[str] = None
 
     def __getitem__(self, key):
         raise TypeError(f"{self.__class__.__name__} object is not subscriptable")
