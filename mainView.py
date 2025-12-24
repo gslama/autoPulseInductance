@@ -95,7 +95,8 @@ class outputView(tk.Frame):
                                      validatecommand=self.check_bar_no, font=("TkDefaultFont", 10, "bold"))
         self.barno_entry.grid(column=1, row=0, sticky="we", pady=(10, 0))
         #self.barno_entry.bind("<FocusOut>", self.checkBarNo)
-        self.barno_entry.focus()
+        self.barno_entry.focus_set()
+        self.barno_entry.icursor(tk.END)
 
         # part number
         self.partno = tk.StringVar()
